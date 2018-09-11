@@ -185,7 +185,6 @@ class Cursor(object):
         query = apply_parameters(operation, parameters or {})
         url = '{baseurl}&tq={query}'.format(
             baseurl=self.baseurl, query=parse.quote(query, safe='/()'))
-        print(url)
         headers = {'X-DataSource-Auth': 'true'}
         r = requests.get(url, headers=headers)
         if r.encoding is None:

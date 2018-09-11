@@ -1,16 +1,16 @@
 """Google Spreadsheets CLI
 
 Usage:
-  gsheetsdb url [--headers=<headers>] [--gid=<gid>] [--sheet=<sheet>]
+  gsheetsdb <url> [--headers=<headers>] [--gid=<gid> | --sheet=<sheet>]
   gsheetsdb (-h | --help)
   gsheetsdb --version
 
 Options:
   -h --help             Show this screen.
   --version             Show version.
-  --headers=<headers>   Specifies how many rows are header rows
+  --headers=<headers>   Specifies how many rows are header rows [default: 0]
   --gid=<gid>           Specifies which sheet in a multi-sheet document to link
-                        to, if you are not linking to the first sheet
+                        to, if you are not linking to the first sheet [default: 0]
   --sheet=<sheet>       Specifies which sheet in a multi-sheet document you are
                         linking to, if you are not linking to the first sheet
 
@@ -19,16 +19,18 @@ Options:
 from __future__ import unicode_literals
 
 import os
-import re
-import sys
 
+from docopt import docopt
 from prompt_toolkit import prompt
 from prompt_toolkit.history import FileHistory
-from prompt_toolkit.contrib.completers import WordCompleter
+from prompt_toolkit.completion import WordCompleter
+from prompt_toolkit.lexers import PygmentsLexer
+from prompt_toolkit.styles.pygments import style_from_pygments_cls
 from pygments.lexers import SqlLexer
 from pygments.style import Style
 from pygments.token import Token
 from pygments.styles.default import DefaultStyle
+from pygments.styles import get_style_by_name
 from six.moves.urllib import parse
 from tabulate import tabulate
 
@@ -86,16 +88,6 @@ scalar_functions = [
 ]
 
 
-class DocumentStyle(Style):
-    styles = {
-        Token.Menu.Completions.Completion.Current: 'bg:#00aaaa #000000',
-        Token.Menu.Completions.Completion: 'bg:#008888 #ffffff',
-        Token.Menu.Completions.ProgressButton: 'bg:#003333',
-        Token.Menu.Completions.ProgressBar: 'bg:#00aaaa',
-    }
-    styles.update(DefaultStyle.styles)
-
-
 def get_connection_kwargs(url):
     parts = parse.urlparse(url)
     if ':' in parts.netloc:
@@ -117,26 +109,27 @@ def get_autocomplete(connection):
     return keywords + aggregate_functions + scalar_functions
 
 
-def main(arguments):
+def main():
     history = FileHistory(os.path.expanduser('~/.gsheetsdb_history'))
 
-    try:
-        url = sys.argv[1]
-    except IndexError:
-        raise Exception('Usage: {0} url'.format(sys.argv[0]))
-
-    kwargs = get_connection_kwargs(url)
-    connection = connect(**kwargs)
+    arguments = docopt(__doc__, version=__version__.__version__)
+    connection = connect(
+        arguments['<url>'],
+        headers=int(arguments['--headers']),
+        gid=int(arguments['--gid']),
+        sheet=arguments['--sheet'])
     cursor = connection.cursor()
 
+    lexer = PygmentsLexer(SqlLexer)
     words = get_autocomplete(connection)
-    sql_completer = WordCompleter(words, ignore_case=True)
+    completer = WordCompleter(words, ignore_case=True)
+    style = style_from_pygments_cls(get_style_by_name('monokai'))
 
     while True:
         try:
             query = prompt(
-                '> ', lexer=SqlLexer, completer=sql_completer,
-                style=DocumentStyle, history=history)
+                '> ', lexer=lexer, completer=completer,
+                style=style, history=history)
         except EOFError:
             break  # Control-D pressed.
 
@@ -156,8 +149,4 @@ def main(arguments):
 
 
 if __name__ == '__main__':
-    from docopt import docopt
-
-    arguments = docopt(__doc__, version=__version__.__version__)
-    #main(arguments)
-    print(arguments)
+    main()
