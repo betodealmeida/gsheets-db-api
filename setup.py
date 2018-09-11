@@ -30,6 +30,7 @@ sqlalchemy_extras = [
 ]
 
 cli_extras = [
+    'docopt',
     'pygments',
     'prompt_toolkit',
     'tabulate',

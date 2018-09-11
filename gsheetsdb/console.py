@@ -1,11 +1,28 @@
+"""Google Spreadsheets CLI
+
+Usage:
+  gsheetsdb url [--headers=<headers>] [--gid=<gid>] [--sheet=<sheet>]
+  gsheetsdb (-h | --help)
+  gsheetsdb --version
+
+Options:
+  -h --help             Show this screen.
+  --version             Show version.
+  --headers=<headers>   Specifies how many rows are header rows
+  --gid=<gid>           Specifies which sheet in a multi-sheet document to link
+                        to, if you are not linking to the first sheet
+  --sheet=<sheet>       Specifies which sheet in a multi-sheet document you are
+                        linking to, if you are not linking to the first sheet
+
+"""
+
 from __future__ import unicode_literals
 
 import os
 import re
 import sys
 
-from prompt_toolkit import prompt, AbortAction
-
+from prompt_toolkit import prompt
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.contrib.completers import WordCompleter
 from pygments.lexers import SqlLexer
@@ -15,99 +32,58 @@ from pygments.styles.default import DefaultStyle
 from six.moves.urllib import parse
 from tabulate import tabulate
 
-from gsheetsdb import connect
+from gsheetsdb import connect, __version__
 
 
 keywords = [
-    'EXPLAIN PLAN FOR',
-    'WITH',
-    'SELECT',
-    'ALL',
-    'DISTINCT',
-    'FROM',
-    'WHERE',
-    'GROUP BY',
-    'HAVING',
-    'ORDER BY',
-    'ASC',
-    'DESC',
-    'LIMIT',
+    'and',
+    'asc',
+    'by',
+    'date',
+    'datetime',
+    'desc',
+    'false',
+    'format',
+    'group',
+    'label',
+    'limit',
+    'not',
+    'offset',
+    'options',
+    'or',
+    'order',
+    'pivot',
+    'select',
+    'timeofday',
+    'timestamp',
+    'true',
+    'where',
 ]
 
 aggregate_functions = [
-    'COUNT',
-    'SUM',
-    'MIN',
-    'MAX',
-    'AVG',
-    'APPROX_COUNT_DISTINCT',
-    'APPROX_QUANTILE',
+    'avg',
+    'count',
+    'max',
+    'min',
+    'sum',
 ]
 
-numeric_functions = [
-    'ABS',
-    'CEIL',
-    'EXP',
-    'FLOOR',
-    'LN',
-    'LOG10',
-    'POW',
-    'SQRT',
+scalar_functions = [
+    'year',
+    'month',
+    'day',
+    'hour',
+    'minute',
+    'second',
+    'millisecond',
+    'quarter',
+    'dayOfWeek',
+    'now',
+    'dateDiff',
+    'toDate',
+    'upper',
+    'lower',
 ]
-
-string_functions = [
-    'CHARACTER_LENGTH',
-    'LOOKUP',
-    'LOWER',
-    'REGEXP_EXTRACT',
-    'REPLACE',
-    'SUBSTRING',
-    'TRIM',
-    'BTRIM',
-    'RTRIM',
-    'LTRIM',
-    'UPPER',
-]
-
-time_functions = [
-    'CURRENT_TIMESTAMP',
-    'CURRENT_DATE',
-    'TIME_FLOOR',
-    'TIME_SHIFT',
-    'TIME_EXTRACT',
-    'TIME_PARSE',
-    'TIME_FORMAT',
-    'MILLIS_TO_TIMESTAMP',
-    'TIMESTAMP_TO_MILLIS',
-    'EXTRACT',
-    'FLOOR',
-    'CEIL',
-]
-
-other_functions = [
-    'CAST',
-    'CASE',
-    'WHEN',
-    'THEN',
-    'END',
-    'NULLIF',
-    'COALESCE',
-]
-
-
-replacements = {
-    '^SHOW SCHEMAS': 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA',
-    '^SHOW TABLES': 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES',
-    '^DESC (?P<table>[^;\s]*)': r"""
-        SELECT COLUMN_NAME,
-               ORDINAL_POSITION,
-               COLUMN_DEFAULT,
-               IS_NULLABLE,
-               DATA_TYPE
-          FROM INFORMATION_SCHEMA.COLUMNS
-         WHERE TABLE_NAME='\1'
-    """.strip(),
-}
 
 
 class DocumentStyle(Style):
@@ -137,33 +113,18 @@ def get_connection_kwargs(url):
     }
 
 
-def get_tables(connection):
-    cursor = connection.cursor()
-    return [
-        row.TABLE_NAME for row in
-        cursor.execute('SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES')
-    ]
-
-
 def get_autocomplete(connection):
-    return (
-        keywords +
-        aggregate_functions +
-        numeric_functions +
-        string_functions +
-        time_functions +
-        other_functions +
-        get_tables(connection)
-    )
+    return keywords + aggregate_functions + scalar_functions
 
 
-def main():
+def main(arguments):
     history = FileHistory(os.path.expanduser('~/.gsheetsdb_history'))
 
     try:
         url = sys.argv[1]
     except IndexError:
-        url = 'http://localhost:8082/druid/v2/sql/'
+        raise Exception('Usage: {0} url'.format(sys.argv[0]))
+
     kwargs = get_connection_kwargs(url)
     connection = connect(**kwargs)
     cursor = connection.cursor()
@@ -175,18 +136,13 @@ def main():
         try:
             query = prompt(
                 '> ', lexer=SqlLexer, completer=sql_completer,
-                style=DocumentStyle, history=history,
-                on_abort=AbortAction.RETRY)
+                style=DocumentStyle, history=history)
         except EOFError:
             break  # Control-D pressed.
 
         # run query
         query = query.strip('; ')
         if query:
-            # shortcuts
-            for pattern, repl in replacements.items():
-                query = re.sub(pattern, repl, query)
-
             try:
                 result = cursor.execute(query)
             except Exception as e:
@@ -200,4 +156,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    from docopt import docopt
+
+    arguments = docopt(__doc__, version=__version__.__version__)
+    #main(arguments)
+    print(arguments)
