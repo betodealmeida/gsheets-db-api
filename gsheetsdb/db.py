@@ -201,7 +201,10 @@ class Cursor(object):
 
         cols = result['table']['cols']
         rows = result['table']['rows']
-        Row = namedtuple('Row', [col['label'] for col in cols], rename=True)
+        Row = namedtuple(
+            'Row',
+            [col['label'].replace(' ', '_') for col in cols],
+            rename=True)
         self._results = [Row(*[col['v'] for col in row['c']]) for row in rows]
         self.description = get_description_from_result(result)
 
