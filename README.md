@@ -24,7 +24,7 @@ $ pip install gsheetsdb[cli]  # if you want to use the CLI; see below
 
 ## CLI ##
 
-The module will install a executable called `gsheetsdb`:
+The module will install an executable called `gsheetsdb`:
 
 ```bash
 $ gsheetsdb https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/ --headers=1
