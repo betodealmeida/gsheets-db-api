@@ -28,7 +28,7 @@ The module will install a executable called `gsheetsdb`:
 
 ```bash
 $ gsheetsdb https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/ --headers=1
-> SELECT *;
+> SELECT *
 country      cnt
 ---------  -----
 BR             1
@@ -40,3 +40,5 @@ country      sum cnt
 BR                 4
 IN                 5
 ```
+
+Note that in your SQL you need to reference columns by their letters. This is being worked on, so you'll be able to access them by label.
