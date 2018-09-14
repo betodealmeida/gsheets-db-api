@@ -11,9 +11,11 @@ import json
 from six import string_types
 from six.moves.urllib import parse
 
+from moz_sql_parser import parse as parse_sql
 import requests
 
 from gsheetsdb import exceptions
+from gsheetsdb.translator import translate
 
 
 # the JSON payloads has this in the beginning
@@ -29,15 +31,15 @@ class Type(Enum):
     TIMEOFDAY = 6
 
 
-def connect(url, headers=0, gid=0, sheet=None):
+def connect():
     """
     Constructor for creating a connection to the database.
 
-        >>> conn = connect('localhost', 8082)
+        >>> conn = connect()
         >>> curs = conn.cursor()
 
     """
-    return Connection(url, headers, gid, sheet)
+    return Connection()
 
 
 def check_closed(f):
@@ -83,26 +85,60 @@ def get_description_from_result(result):
     ]
 
 
+def get_url(url, headers=0, gid=0, sheet=None):
+    # XXX remove /edit#gid=0
+    args = {}
+    if headers > 0:
+        args['headers'] = headers
+
+    if sheet is not None:
+        args['sheet'] = sheet
+    else:
+        args['gid'] = gid
+
+    parts = parse.urlparse(url)
+    path = '/'.join((parts.path.rstrip('/'), 'gviz/tq'))
+    params = parse.urlencode(args)
+    return parse.urlunparse(
+        (parts.scheme, parts.netloc, path, None, params, None))
+
+
+def extract_url(sql):
+    parsed_query = parse_sql(sql)
+    return parsed_query['from']
+
+
+def get_column_map(url):
+    query = 'SELECT * LIMIT 0'
+    result = run_query(url, query)
+    return {col['label']: col['id'] for col in result['table']['cols']}
+
+
+def run_query(baseurl, query):
+    url = '{baseurl}&tq={query}'.format(
+        baseurl=baseurl, query=parse.quote(query, safe='/()'))
+    headers = {'X-DataSource-Auth': 'true'}
+    r = requests.get(url, headers=headers)
+    if r.encoding is None:
+        r.encoding = 'utf-8'
+
+    # raise any error messages
+    if r.status_code != 200:
+        raise exceptions.ProgrammingError(r.text)
+
+    if r.text.startswith(LEADING):
+        result = json.loads(r.text[len(LEADING):])
+    else:
+        result = r.json()
+
+    return result
+
+
 class Connection(object):
 
     """Connection to a Google Spreadsheet."""
 
-    def __init__(self, url, headers=0, gid=0, sheet=None):
-        args = {}
-        if headers > 0:
-            args['headers'] = headers
-
-        if sheet is not None:
-            args['sheet'] = sheet
-        else:
-            args['gid'] = gid
-
-        parts = parse.urlparse(url)
-        path = '/'.join((parts.path.rstrip('/'), 'gviz/tq'))
-        params = parse.urlencode(args)
-        self.baseurl = parse.urlunparse(
-            (parts.scheme, parts.netloc, path, None, params, None))
-
+    def __init__(self):
         self.closed = False
         self.cursors = []
 
@@ -128,15 +164,15 @@ class Connection(object):
     @check_closed
     def cursor(self):
         """Return a new Cursor Object using the connection."""
-        cursor = Cursor(self.baseurl)
+        cursor = Cursor()
         self.cursors.append(cursor)
 
         return cursor
 
     @check_closed
-    def execute(self, operation, parameters=None):
+    def execute(self, operation, parameters=None, headers=0):
         cursor = self.cursor()
-        return cursor.execute(operation, parameters)
+        return cursor.execute(operation, parameters, headers)
 
     def __enter__(self):
         return self.cursor()
@@ -149,9 +185,7 @@ class Cursor(object):
 
     """Connection cursor."""
 
-    def __init__(self, baseurl):
-        self.baseurl = baseurl
-
+    def __init__(self):
         # This read/write attribute specifies the number of rows to fetch at a
         # time with .fetchmany(). It defaults to 1 meaning to fetch a single
         # row at a time.
@@ -177,28 +211,20 @@ class Cursor(object):
         self.closed = True
 
     @check_closed
-    def execute(self, operation, parameters=None):
-# curl --header "X-DataSource-Auth:true" 'https://docs.google.com/spreadsheets/d/1q9REzifHb90vewm4XMjnWFKOPNTcG6Xh8s6Hwo9OpFo/gviz/tq?gid=0&headers=2&tq=select%20A%2C%20sum(B)%20group%20by%20A'
-# {"version":"0.6","reqId":"0","status":"ok","sig":"850295587","table":{"cols":[{"id":"A","label":"country string","type":"string"},{"id":"sum-B","label":"sum cnt number","type":"number"}],"rows":[{"c":[{"v":"BR"},{"v":4.0}]},{"c":[{"v":"IN"},{"v":5.0}]}]}}
+    def execute(self, operation, parameters=None, headers=0):
         self.description = None
-
         query = apply_parameters(operation, parameters or {})
-        url = '{baseurl}&tq={query}'.format(
-            baseurl=self.baseurl, query=parse.quote(query, safe='/()'))
-        headers = {'X-DataSource-Auth': 'true'}
-        r = requests.get(url, headers=headers)
-        if r.encoding is None:
-            r.encoding = 'utf-8'
 
-        # raise any error messages
-        if r.status_code != 200:
-            raise exceptions.ProgrammingError(r.text)
+        # extract URL from the `FROM` clause
+        from_ = extract_url(query)
+        baseurl = get_url(from_, headers)
 
-        if r.text.startswith(LEADING):
-            result = json.loads(r.text[len(LEADING):])
-        else:
-            result = r.json()
+        # translate colum names to ids
+        if headers > 0:
+            column_map = get_column_map(baseurl) 
+            query = translate(query, column_map)
 
+        result = run_query(baseurl, query)
         cols = result['table']['cols']
         rows = result['table']['rows']
         Row = namedtuple(

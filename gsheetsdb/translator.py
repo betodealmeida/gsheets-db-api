@@ -29,7 +29,7 @@ def replace_value(json, replacement_map):
 def translate(sql, column_map):
     parsed_query = parse(sql)
 
-    # check if it's a url, otherwise raise exception
+    # XXX check if it's a url, otherwise raise exception
     from_ = parsed_query.pop('from')
 
     for clause in find_value_clauses(parsed_query):

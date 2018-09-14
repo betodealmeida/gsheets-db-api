@@ -1,7 +1,7 @@
 """Google Spreadsheets CLI
 
 Usage:
-  gsheetsdb <url> [--headers=<headers>] [--gid=<gid> | --sheet=<sheet>]
+  gsheetsdb [--headers=<headers>]
   gsheetsdb (-h | --help)
   gsheetsdb --version
 
@@ -9,10 +9,6 @@ Options:
   -h --help             Show this screen.
   --version             Show version.
   --headers=<headers>   Specifies how many rows are header rows [default: 0]
-  --gid=<gid>           Specifies which sheet in a multi-sheet document to link
-                        to, if you are not linking to the first sheet [default: 0]
-  --sheet=<sheet>       Specifies which sheet in a multi-sheet document you are
-                        linking to, if you are not linking to the first sheet
 
 """
 
@@ -113,11 +109,8 @@ def main():
     history = FileHistory(os.path.expanduser('~/.gsheetsdb_history'))
 
     arguments = docopt(__doc__, version=__version__.__version__)
-    connection = connect(
-        arguments['<url>'],
-        headers=int(arguments['--headers']),
-        gid=int(arguments['--gid']),
-        sheet=arguments['--sheet'])
+    connection = connect()
+    headers = int(arguments['--headers'])
     cursor = connection.cursor()
 
     lexer = PygmentsLexer(SqlLexer)
@@ -137,13 +130,14 @@ def main():
         query = query.strip('; ')
         if query:
             try:
-                result = cursor.execute(query)
+                result = cursor.execute(query, headers=headers)
             except Exception as e:
                 print(e)
+                raise e
                 continue
 
-            headers = [t[0] for t in cursor.description or []]
-            print(tabulate(result, headers=headers))
+            columns = [t[0] for t in cursor.description or []]
+            print(tabulate(result, headers=columns))
 
     print('GoodBye!')
 

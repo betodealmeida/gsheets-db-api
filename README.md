@@ -3,16 +3,26 @@
 Using [this spreadsheet](https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/) as an example:
 
 ```python
->>> from gsheetsdb import connect
->>> conn = connect('https://docs.google.com/spreadsheets/d/1q9REzifHb90vewm4XMjnWFKOPNTcG6Xh8s6Hwo9OpFo/', headers=1)
->>> result = conn.execute('SELECT A, SUM(B) GROUP BY A')
->>> for row in result:
-...     print(row)
-...
+from gsheetsdb import connect
+conn = connect()
+result = conn.execute("""
+    SELECT
+        country
+      , SUM(cnt)
+    FROM
+        "https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/"
+    GROUP BY
+        country
+""", headers=1)
+for row in result:
+    print(row)
+```
+
+This will print:
+
+```
 Row(country='BR', sum_cnt=4.0)
 Row(country='IN', sum_cnt=5.0)
->>> print(result.description)
-[('country', <Type.STRING: 1>, None, None, None, None, True), ('sum cnt', <Type.NUMBER: 2>, None, None, None, None, True)]
 ```
 
 ## Installation ##
@@ -27,18 +37,18 @@ $ pip install gsheetsdb[cli]  # if you want to use the CLI; see below
 The module will install an executable called `gsheetsdb`:
 
 ```bash
-$ gsheetsdb https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/ --headers=1
-> SELECT *
+$ gsheetsdb --headers=1
+> SELECT * FROM "https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/"
 country      cnt
 ---------  -----
 BR             1
 BR             3
 IN             5
-> SELECT A, SUM(B) GROUP BY A
+> SELECT country, SUM(cnt) FROM "https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1
+pscv8ZXPtg8/" GROUP BY country
 country      sum cnt
 ---------  ---------
 BR                 4
 IN                 5
+>
 ```
-
-Note that in your SQL you need to reference columns by their letters. This is being worked on, so you'll be able to access them by label.
