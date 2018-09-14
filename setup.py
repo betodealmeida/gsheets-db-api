@@ -109,9 +109,7 @@ setup(
             'gsheetsdb = gsheetsdb.console:main',
         ],
         'sqlalchemy.dialects': [
-            'gsheets = gsheetsdb.sqlalchemy:GsheetsHTTPDialect',
-            'gsheets.http = gsheetsdb.sqlalchemy:GsheetsHTTPDialect',
-            'gsheets.https = gsheetsdb.sqlalchemy:GsheetsHTTPSDialect',
+            'gsheets = gsheetsdb.sqlalchemy:GsheetsDialect',
         ],
     },
     install_requires=REQUIRED,
