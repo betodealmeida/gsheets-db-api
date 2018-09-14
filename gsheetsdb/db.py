@@ -23,12 +23,12 @@ LEADING = ")]}'\n"
 
 
 class Type(Enum):
-    STRING = 1
-    NUMBER = 2
-    BOOLEAN = 3
-    DATE = 4
-    DATETIME = 5
-    TIMEOFDAY = 6
+    STRING = 'string'
+    NUMBER = 'number'
+    BOOLEAN = 'boolean'
+    DATE = 'date'
+    DATETIME = 'datetime'
+    TIMEOFDAY = 'timeofday'
 
 
 def connect():
@@ -74,7 +74,7 @@ def get_description_from_result(result):
     return [
         (
             col['label'],               # name
-            Type[col['type'].upper()],  # type_code
+            Type(col['type'].lower()),  # type_code
             None,                       # [display_size]
             None,                       # [internal_size]
             None,                       # [precision]
