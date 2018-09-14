@@ -133,7 +133,6 @@ def main():
                 result = cursor.execute(query, headers=headers)
             except Exception as e:
                 print(e)
-                raise e
                 continue
 
             columns = [t[0] for t in cursor.description or []]
