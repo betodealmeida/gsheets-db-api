@@ -9,96 +9,63 @@ from sqlalchemy.engine import default
 from sqlalchemy.sql import compiler
 from sqlalchemy import types
 
-import druiddb
-from druiddb import exceptions
-
-
-RESERVED_SCHEMAS = ['INFORMATION_SCHEMA']
+import gsheetsdb
+from gsheetsdb import exceptions
 
 
 type_map = {
-    'char': types.String,
-    'varchar': types.String,
-    'float': types.Float,
-    'decimal': types.Float,
-    'real': types.Float,
-    'double': types.Float,
+    'string': types.String,
+    'number': types.Numeric,
     'boolean': types.Boolean,
-    'tinyint': types.BigInteger,
-    'smallint': types.BigInteger,
-    'integer': types.BigInteger,
-    'bigint': types.BigInteger,
-    'timestamp': types.TIMESTAMP,
     'date': types.DATE,
+    'datetime': types.DATETIME,
+    'timeofday': types.TIME,
 }
 
 
-class UniversalSet(object):
-    def __contains__(self, item):
-        return True
+class GsheetsIdentifierPreparer(compiler.IdentifierPreparer):
+    # https://developers.google.com/chart/interactive/docs/querylanguage#reserved-words
+    reserved_words = {
+        'and',
+        'asc',
+        'by',
+        'date',
+        'datetime',
+        'desc',
+        'false',
+        'format',
+        'group',
+        'label',
+        'limit',
+        'not',
+        'offset',
+        'options',
+        'or',
+        'order',
+        'pivot',
+        'select',
+        'timeofday',
+        'timestamp',
+        'true',
+        'where',
+    }
 
 
-class DruidIdentifierPreparer(compiler.IdentifierPreparer):
-    reserved_words = UniversalSet()
-
-
-class DruidCompiler(compiler.SQLCompiler):
+class GsheetsCompiler(compiler.SQLCompiler):
     pass
 
 
-class DruidTypeCompiler(compiler.GenericTypeCompiler):
-    def visit_REAL(self, type_, **kwargs):
-        return "DOUBLE"
-
-    def visit_NUMERIC(self, type_, **kwargs):
-        return "LONG"
-
-    visit_DECIMAL = visit_NUMERIC
-    visit_INTEGER = visit_NUMERIC
-    visit_SMALLINT = visit_NUMERIC
-    visit_BIGINT = visit_NUMERIC
-    visit_BOOLEAN = visit_NUMERIC
-    visit_TIMESTAMP = visit_NUMERIC
-    visit_DATE = visit_NUMERIC
-
-    def visit_CHAR(self, type_, **kwargs):
-        return "STRING"
-
-    visit_NCHAR = visit_CHAR
-    visit_VARCHAR = visit_CHAR
-    visit_NVARCHAR = visit_CHAR
-    visit_TEXT = visit_CHAR
-
-    def visit_DATETIME(self, type_, **kwargs):
-        raise exceptions.NotSupportedError('Type DATETIME is not supported')
-
-    def visit_TIME(self, type_, **kwargs):
-        raise exceptions.NotSupportedError('Type TIME is not supported')
-
-    def visit_BINARY(self, type_, **kwargs):
-        raise exceptions.NotSupportedError('Type BINARY is not supported')
-
-    def visit_VARBINARY(self, type_, **kwargs):
-        raise exceptions.NotSupportedError('Type VARBINARY is not supported')
-
-    def visit_BLOB(self, type_, **kwargs):
-        raise exceptions.NotSupportedError('Type BLOB is not supported')
-
-    def visit_CLOB(self, type_, **kwargs):
-        raise exceptions.NotSupportedError('Type CBLOB is not supported')
-
-    def visit_NCLOB(self, type_, **kwargs):
-        raise exceptions.NotSupportedError('Type NCBLOB is not supported')
+class GsheetsTypeCompiler(compiler.GenericTypeCompiler):
+    pass
 
 
-class DruidDialect(default.DefaultDialect):
+class GsheetsDialect(default.DefaultDialect):
 
-    name = 'druid'
-    scheme = 'http'
+    name = 'gsheets'
     driver = 'rest'
-    preparer = DruidIdentifierPreparer
-    statement_compiler = DruidCompiler
-    type_compiler = DruidTypeCompiler
+    preparer = GsheetsIdentifierPreparer
+    statement_compiler = GsheetsCompiler
+    type_compiler = GsheetsTypeCompiler
     supports_alter = False
     supports_pk_autoincrement = False
     supports_default_values = False
@@ -111,7 +78,7 @@ class DruidDialect(default.DefaultDialect):
 
     @classmethod
     def dbapi(cls):
-        return druiddb
+        return gsheetsdb
 
     def create_connect_args(self, url):
         kwargs = {
@@ -123,16 +90,13 @@ class DruidDialect(default.DefaultDialect):
         return ([], kwargs)
 
     def get_schema_names(self, connection, **kwargs):
-        # Each Druid datasource appears as a table in the "druid" schema. This
-        # is also the default schema, so Druid datasources can be referenced as
-        # either druid.dataSourceName or simply dataSourceName.
+        # Each Gsheets datasource appears as a table in the "gsheets" schema. This
+        # is also the default schema, so Gsheets datasources can be referenced as
+        # either gsheets.dataSourceName or simply dataSourceName.
         result = connection.execute(
             'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA')
 
-        return [
-            row.SCHEMA_NAME for row in result
-            if row.SCHEMA_NAME not in RESERVED_SCHEMAS
-        ]
+        return [row.SCHEMA_NAME for row in result]
 
     def has_table(self, connection, table_name, schema=None):
         query = f"""
@@ -231,19 +195,11 @@ class DruidDialect(default.DefaultDialect):
         return True
 
 
-DruidHTTPDialect = DruidDialect
-
-
-class DruidHTTPSDialect(DruidDialect):
-
-    scheme = 'https'
-
-
-def get_is_nullable(druid_is_nullable):
+def get_is_nullable(gsheets_is_nullable):
     # this should be 'YES' or 'NO'; we default to no
-    return druid_is_nullable.lower() == 'yes'
+    return gsheets_is_nullable.lower() == 'yes'
 
 
-def get_default(druid_column_default):
+def get_default(gsheets_column_default):
     # currently unused, returns ''
-    return str(druid_column_default) if druid_column_default != '' else None
+    return str(gsheets_column_default) if gsheets_column_default != '' else None
