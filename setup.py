@@ -25,6 +25,10 @@ REQUIRED = [
 if sys.version_info < (3, 4):
     REQUIRED.append('enum')
 
+sqlalchemy_extras = [
+    'sqlalchemy',
+]
+
 cli_extras = [
     'docopt',
     'pygments',
@@ -104,11 +108,15 @@ setup(
         'console_scripts': [
             'gsheetsdb = gsheetsdb.console:main',
         ],
+        'sqlalchemy.dialects': [
+            'gsheets = gsheetsdb.sqla:GSheetsDialect',
+        ],
     },
     install_requires=REQUIRED,
     extras_require={
-        'dev': development_extras,
         'cli': cli_extras,
+        'dev': development_extras,
+        'sqlalchemy': sqlalchemy_extras,
     },
     include_package_data=True,
     license='MIT',
