@@ -1,5 +1,3 @@
-# -*- coding: future_fstrings -*-
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -61,6 +59,8 @@ class GsheetsTypeCompiler(compiler.GenericTypeCompiler):
 
 class GsheetsDialect(default.DefaultDialect):
 
+    # TODO: review these
+    # http://docs.sqlalchemy.org/en/latest/core/internals.html#sqlalchemy.engine.interfaces.Dialect
     name = 'gsheets'
     driver = 'rest'
     preparer = GsheetsIdentifierPreparer
@@ -81,40 +81,21 @@ class GsheetsDialect(default.DefaultDialect):
         return gsheetsdb
 
     def create_connect_args(self, url):
-        kwargs = {
-            'host': url.host,
-            'port': url.port or 8082,
-            'path': url.database,
-            'scheme': self.scheme,
-        }
-        return ([], kwargs)
+        self.catalog = "https://docs.google.com/spreadsheets/d/1423FwKsIWozWDqZmgn52DughAOSsz-KCcAy3lBM3pIM/edit#gid=0"
+        print(url)
+        return ([], {})
 
     def get_schema_names(self, connection, **kwargs):
-        # Each Gsheets datasource appears as a table in the "gsheets" schema. This
-        # is also the default schema, so Gsheets datasources can be referenced as
-        # either gsheets.dataSourceName or simply dataSourceName.
-        result = connection.execute(
-            'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA')
-
-        return [row.SCHEMA_NAME for row in result]
+        return ['default']
 
     def has_table(self, connection, table_name, schema=None):
-        query = f"""
-            SELECT COUNT(*) > 0 AS exists_
-              FROM INFORMATION_SCHEMA.TABLES
-             WHERE TABLE_NAME = '{table_name}'
-        """
-
-        result = connection.execute(query)
-        return result.fetchone().exists_
+        return True
 
     def get_table_names(self, connection, schema=None, **kwargs):
-        query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES"
-        if schema:
-            query = f"{query} WHERE TABLE_SCHEMA = '{schema}'"
-
-        result = connection.execute(query)
-        return [row.TABLE_NAME for row in result]
+        return [
+            'https://docs.google.com/spreadsheets/d/1423FwKsIWozWDqZmgn52DughAOSsz-KCcAy3lBM3pIM/edit?headers=1#gid=0',
+            'https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/edit?headers=2#gid=1077884006',
+        ]
 
     def get_view_names(self, connection, schema=None, **kwargs):
         return []
@@ -123,27 +104,17 @@ class GsheetsDialect(default.DefaultDialect):
         return {}
 
     def get_columns(self, connection, table_name, schema=None, **kwargs):
-        query = f"""
-            SELECT COLUMN_NAME,
-                   DATA_TYPE,
-                   IS_NULLABLE,
-                   COLUMN_DEFAULT
-              FROM INFORMATION_SCHEMA.COLUMNS
-             WHERE TABLE_NAME = '{table_name}'
-        """
-        if schema:
-            query = f"{query} AND TABLE_SCHEMA = '{schema}'"
-
+        query = "SELECT * FROM {table_name} LIMIT 0"
         result = connection.execute(query)
 
         return [
             {
-                'name': row.COLUMN_NAME,
-                'type': type_map[row.DATA_TYPE.lower()],
-                'nullable': get_is_nullable(row.IS_NULLABLE),
-                'default': get_default(row.COLUMN_DEFAULT),
+                'name': col[0],
+                'type': col[1],
+                'nullable': True,
+                'default': None,
             }
-            for row in result
+            for col in result.description
         ]
 
     def get_pk_constraint(self, connection, table_name, schema=None, **kwargs):
@@ -193,13 +164,3 @@ class GsheetsDialect(default.DefaultDialect):
 
     def _check_unicode_description(self, connection):
         return True
-
-
-def get_is_nullable(gsheets_is_nullable):
-    # this should be 'YES' or 'NO'; we default to no
-    return gsheets_is_nullable.lower() == 'yes'
-
-
-def get_default(gsheets_column_default):
-    # currently unused, returns ''
-    return str(gsheets_column_default) if gsheets_column_default != '' else None
