@@ -1,5 +1,7 @@
 # A Python DB API 2.0 for Google Spreadsheets #
 
+This module allows you to query Google Spreadsheets using SQL.
+
 Using [this spreadsheet](https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/) as an example:
 
 ```python
@@ -52,3 +54,7 @@ BR                 4
 IN                 5
 >
 ```
+
+## SQLAlchemy support ##
+
+In progress.
