@@ -3,6 +3,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from six.moves.urllib import parse
+
 from sqlalchemy.engine import default
 from sqlalchemy.sql import compiler
 from sqlalchemy import types
@@ -21,7 +23,18 @@ type_map = {
 }
 
 
-class GsheetsIdentifierPreparer(compiler.IdentifierPreparer):
+def add_headers(url, headers):
+    parts = parse.urlparse(url)
+    if parts.fragment.startswith('gid='):
+        gid = parts.fragment[len('gid='):]
+    else:
+        gid = 0
+    params = parse.urlencode({'headers': headers, 'gid': gid})
+    return parse.urlunparse(
+        (parts.scheme, parts.netloc, parts.path, None, params, None))
+
+
+class GSheetsIdentifierPreparer(compiler.IdentifierPreparer):
     # https://developers.google.com/chart/interactive/docs/querylanguage#reserved-words
     reserved_words = {
         'and',
@@ -49,23 +62,24 @@ class GsheetsIdentifierPreparer(compiler.IdentifierPreparer):
     }
 
 
-class GsheetsCompiler(compiler.SQLCompiler):
+class GSheetsCompiler(compiler.SQLCompiler):
     pass
 
 
-class GsheetsTypeCompiler(compiler.GenericTypeCompiler):
+class GSheetsTypeCompiler(compiler.GenericTypeCompiler):
     pass
 
 
-class GsheetsDialect(default.DefaultDialect):
+class GSheetsDialect(default.DefaultDialect):
 
     # TODO: review these
     # http://docs.sqlalchemy.org/en/latest/core/internals.html#sqlalchemy.engine.interfaces.Dialect
     name = 'gsheets'
+    scheme = 'https'
     driver = 'rest'
-    preparer = GsheetsIdentifierPreparer
-    statement_compiler = GsheetsCompiler
-    type_compiler = GsheetsTypeCompiler
+    preparer = GSheetsIdentifierPreparer
+    statement_compiler = GSheetsCompiler
+    type_compiler = GSheetsTypeCompiler
     supports_alter = False
     supports_pk_autoincrement = False
     supports_default_values = False
@@ -81,21 +95,41 @@ class GsheetsDialect(default.DefaultDialect):
         return gsheetsdb
 
     def create_connect_args(self, url):
-        self.catalog = "https://docs.google.com/spreadsheets/d/1423FwKsIWozWDqZmgn52DughAOSsz-KCcAy3lBM3pIM/edit#gid=0"
-        print(url)
+        port = ':{url.port}'.format(url=url) if url.port else ''
+        if url.host is None:
+            self.url = None
+        else:
+            self.url = '{scheme}://{host}{port}/{database}'.format(
+                scheme=self.scheme,
+                host=url.host,
+                port=port,
+                database=url.database or '',
+            )
         return ([], {})
 
     def get_schema_names(self, connection, **kwargs):
-        return ['default']
+        if self.url is None:
+            return []
+
+        query = 'SELECT C FROM "{catalog}"'.format(catalog=self.url)
+        result = connection.execute(query)
+        # use `set`, since the API has no `SELECT DISTINCT`
+        return list({row[0] for row in result.fetchall()})
 
     def has_table(self, connection, table_name, schema=None):
-        return True
+        if self.url is None:
+            return True
+
+        return table_name in self.get_table_names(connection, schema)
 
     def get_table_names(self, connection, schema=None, **kwargs):
-        return [
-            'https://docs.google.com/spreadsheets/d/1423FwKsIWozWDqZmgn52DughAOSsz-KCcAy3lBM3pIM/edit?headers=1#gid=0',
-            'https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/edit?headers=2#gid=1077884006',
-        ]
+        if self.url is None:
+            return []
+
+        query = """SELECT * FROM "{catalog}" WHERE C='{schema}'""".format(
+            catalog=self.url, schema=schema)
+        result = connection.execute(query)
+        return [add_headers(row[0], int(row[1])) for row in result.fetchall()]
 
     def get_view_names(self, connection, schema=None, **kwargs):
         return []
@@ -104,17 +138,16 @@ class GsheetsDialect(default.DefaultDialect):
         return {}
 
     def get_columns(self, connection, table_name, schema=None, **kwargs):
-        query = "SELECT * FROM {table_name} LIMIT 0"
+        query = 'SELECT * FROM "{table}" LIMIT 0'.format(table=table_name)
         result = connection.execute(query)
-
         return [
             {
                 'name': col[0],
-                'type': col[1],
+                'type': type_map[col[1].value],
                 'nullable': True,
                 'default': None,
             }
-            for col in result.description
+            for col in result._cursor_description()
         ]
 
     def get_pk_constraint(self, connection, table_name, schema=None, **kwargs):
