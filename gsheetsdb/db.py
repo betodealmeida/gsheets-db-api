@@ -86,19 +86,31 @@ def get_description_from_result(result):
 
 
 def get_url(url, headers=0, gid=0, sheet=None):
-    # XXX remove /edit#gid=0
+    parts = parse.urlparse(url)
+    if parts.path.endswith('/edit'):
+        path = parts.path[:-len('/edit')]
+    else:
+        path = parts.path
+    path = '/'.join((path.rstrip('/'), 'gviz/tq'))
+
+    qs = parse.parse_qs(parts.query)
+    if 'headers' in qs:
+        headers = int(qs['headers'][-1])
+    if 'gid' in qs:
+        gid = qs['gid'][0]
+
+    if parts.fragment.startswith('gid='):
+        gid = parts.fragment[len('gid='):]
+
     args = {}
     if headers > 0:
         args['headers'] = headers
-
     if sheet is not None:
         args['sheet'] = sheet
     else:
         args['gid'] = gid
-
-    parts = parse.urlparse(url)
-    path = '/'.join((parts.path.rstrip('/'), 'gviz/tq'))
     params = parse.urlencode(args)
+
     return parse.urlunparse(
         (parts.scheme, parts.netloc, path, None, params, None))
 
@@ -223,9 +235,8 @@ class Cursor(object):
         baseurl = get_url(from_, headers)
 
         # translate colum names to ids
-        if headers > 0:
-            column_map = get_column_map(baseurl) 
-            query = translate(query, column_map)
+        column_map = get_column_map(baseurl) 
+        query = translate(query, column_map)
 
         result = run_query(baseurl, query)
         cols = result['table']['cols']
