@@ -9,26 +9,25 @@ from six import string_types
 from gsheetsdb.exceptions import NotSupportedError
 
 
-def find_value_clauses(json):
-    if isinstance(json, dict):
-        if 'value' in json:
-            yield json
-        else:
-            for obj in json.values():
-                for value in find_value_clauses(obj):
-                    yield value
-    elif isinstance(json, list):
-        for element in json:
-            for value in find_value_clauses(element):
-                yield value
+def replace(obj, replacements):
+    """
+    Modify parsed query recursively in place.
 
-
-def replace_value(json, replacement_map):
-    for key, value in json.items():
-        if isinstance(value, dict):
-            replace_value(value, replacement_map)
-        elif value in replacement_map:
-            json[key] = replacement_map[value]
+    """
+    if isinstance(obj, list):
+        for i, value in enumerate(obj):
+            if isinstance(value, string_types) and value in replacements:
+                obj[i] = replacements[value]
+            elif isinstance(value, (list, dict)):
+                replace(value, replacements)
+    elif isinstance(obj, dict):
+        for key, value in obj.items():
+            if isinstance(value, string_types) and value in replacements:
+                obj[key] = replacements[value]
+            elif isinstance(value, list):
+                replace(value, replacements)
+            elif isinstance(value, dict) and 'literal' not in value:
+                replace(value, replacements)
 
 
 def translate(sql, column_map):
@@ -42,7 +41,6 @@ def translate(sql, column_map):
     if not isinstance(from_, string_types):
         raise NotSupportedError('FROM should be a URL')
 
-    for clause in find_value_clauses(parsed_query):
-        replace_value(clause, column_map)
+    replace(parsed_query, column_map)
 
     return format(parsed_query)

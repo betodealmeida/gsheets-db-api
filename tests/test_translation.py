@@ -27,6 +27,12 @@ class TranslationTestSuite(unittest.TestCase):
         result = translate(sql, {'country': 'A', 'cnt': 'B'})
         self.assertEquals(result, expected)
 
+    def test_where_groupby(self):
+        sql = '''SELECT country, SUM(cnt) FROM "http://example.com" WHERE country != 'US' GROUP BY country'''
+        expected = "SELECT A, SUM(B) WHERE A <> 'US' GROUP BY A"
+        result = translate(sql, {'country': 'A', 'cnt': 'B'})
+        self.assertEquals(result, expected)
+
     def test_groupby(self):
         sql = 'SELECT country, SUM(cnt) FROM "http://example.com" GROUP BY country'
         expected = "SELECT A, SUM(B) GROUP BY A"
