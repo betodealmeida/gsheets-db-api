@@ -30,6 +30,25 @@ def replace(obj, replacements):
                 replace(value, replacements)
 
 
+def remove_alias(parsed_query):
+    select = parsed_query['select']
+    if isinstance(select, dict):
+        select = [select]
+
+    for clause in select:
+        if 'name' in clause:
+            del clause['name']
+
+
+def extract_column_aliases(sql):
+    parsed_query = parse(sql)
+    select = parsed_query['select']
+    if isinstance(select, dict):
+        select = [select]
+
+    return [clause.get('name') for clause in select]
+
+
 def translate(sql, column_map):
     parsed_query = parse(sql)
 
@@ -41,6 +60,7 @@ def translate(sql, column_map):
     if not isinstance(from_, string_types):
         raise NotSupportedError('FROM should be a URL')
 
+    remove_alias(parsed_query)
     replace(parsed_query, column_map)
 
     return format(parsed_query)

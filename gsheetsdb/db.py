@@ -15,7 +15,7 @@ from moz_sql_parser import parse as parse_sql
 import requests
 
 from gsheetsdb import exceptions
-from gsheetsdb.translator import translate
+from gsheetsdb.translator import extract_column_aliases, translate
 
 
 # the JSON payloads has this in the beginning
@@ -215,6 +215,9 @@ class Cursor(object):
         self.description = None
         query = apply_parameters(operation, parameters or {})
 
+        # fetch aliases, since they will be removed by the translator
+        aliases = extract_column_aliases(query)
+
         # extract URL from the `FROM` clause
         from_ = extract_url(query)
         baseurl = get_url(from_, headers)
@@ -226,6 +229,10 @@ class Cursor(object):
 
         result = run_query(baseurl, query)
         cols = result['table']['cols']
+        for alias, col in zip(aliases, cols):
+            if alias is not None:
+                col['label'] = alias
+
         rows = result['table']['rows']
         Row = namedtuple(
             'Row',

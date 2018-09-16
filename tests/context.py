@@ -5,4 +5,4 @@ sys.path.insert(0, os.path.abspath(
 
 import gsheetsdb
 from gsheetsdb import exceptions
-from gsheetsdb.translator import translate
+from gsheetsdb.translator import extract_column_aliases, translate

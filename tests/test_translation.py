@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .context import exceptions, gsheetsdb, translate
+from .context import exceptions, extract_column_aliases, gsheetsdb, translate
 
 import unittest
 
@@ -80,6 +80,30 @@ class TranslationTestSuite(unittest.TestCase):
         sql = 'SELECT country FROM "http://example.com" LIMIT 10 OFFSET 5'
         expected = 'SELECT A LIMIT 10 OFFSET 5'
         result = translate(sql, {'country': 'A'})
+        self.assertEquals(result, expected)
+
+    def test_alias(self):
+        sql = 'SELECT SUM(cnt) AS total FROM "http://example.com"'
+        expected = 'SELECT SUM(B)'
+        result = translate(sql, {'cnt': 'B'})
+        self.assertEquals(result, expected)
+
+    def test_multiple_aliases(self):
+        sql = 'SELECT country AS dim1, SUM(cnt) AS total FROM "http://example.com" GROUP BY country'
+        expected = 'SELECT A, SUM(B) GROUP BY A'
+        result = translate(sql, {'country': 'A', 'cnt': 'B'})
+        self.assertEquals(result, expected)
+
+    def test_column_aliases(self):
+        sql = 'SELECT SUM(cnt) AS total FROM "http://example.com"'
+        expected = ['total']
+        result = extract_column_aliases(sql)
+        self.assertEquals(result, expected)
+
+    def test_column_aliases_multiple(self):
+        sql = 'SELECT SUM(cnt) AS total, country, gender AS dim1 FROM "http://example.com"'
+        expected = ['total', None, 'dim1']
+        result = extract_column_aliases(sql)
         self.assertEquals(result, expected)
 
 
