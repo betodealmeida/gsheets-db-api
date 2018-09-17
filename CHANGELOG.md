@@ -13,3 +13,6 @@
 ## [0.1.3] - 2018-09-16
 - Fix small bug in SQL Alchemy compiler.
 - Allow aliases in `ORDER BY`.
+
+## [0.1.4] - 2018-09-16
+- Fix `visit_column` method.
