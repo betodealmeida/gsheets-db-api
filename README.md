@@ -4,6 +4,15 @@ This module allows you to query Google Spreadsheets using SQL.
 
 Using [this spreadsheet](https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/) as an example:
 
+| | A | B |
+|-|--------|-----|
+| 1 | country | cnt |
+| 2 | BR | 1 |
+| 3 | BR | 3 |
+| 4 | IN | 5 |
+
+Here's a simple query using the Python API:
+
 ```python
 from gsheetsdb import connect
 
@@ -78,4 +87,11 @@ query = select([func.count(table.columns.country)], from_obj=table)
 print(query.scalar())  # prints 3.0
 ```
 
-Alternatively, you can initialize the engine with a "catalog". The catalog is a Google spreadsheet where each row points to another Google spreadsheet, with URL, number of headers and schema as the columns. You can see an example [here](https://docs.google.com/spreadsheets/d/1AAqVVSpGeyRZyrr4n--fb_IxhLwwKtLbjfu4h6MyyYA/edit#gid=0).
+Alternatively, you can initialize the engine with a "catalog". The catalog is a Google spreadsheet where each row points to another Google spreadsheet, with URL, number of headers and schema as the columns. You can see an example [here](https://docs.google.com/spreadsheets/d/1AAqVVSpGeyRZyrr4n--fb_IxhLwwKtLbjfu4h6MyyYA/edit#gid=0):
+
+|| A | B | C |
+|-|-|-|-|
+| 1 | https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/edit#gid=0 | 1 | default |
+| 2 | https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/edit#gid=1077884006 | 2 | default |
+
+This will make the two spreadsheets above available as "tables" in the `default` schema.
