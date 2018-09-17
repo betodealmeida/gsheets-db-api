@@ -21,6 +21,7 @@ AUTHOR = 'Beto Dealmeida'
 REQUIRED = [
     'requests',
     'six',
+    'moz_sql_parser',
 ]
 if sys.version_info < (3, 4):
     REQUIRED.append('enum')
