@@ -64,7 +64,8 @@ class GSheetsIdentifierPreparer(compiler.IdentifierPreparer):
 
 class GSheetsCompiler(compiler.SQLCompiler):
     def visit_column(self, column, result_map=None, **kwargs):
-        column.table.named_with_column = False
+        if column.table is not None:
+            column.table.named_with_column = False
         return super().visit_column(column, result_map, **kwargs)
 
 
