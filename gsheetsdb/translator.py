@@ -30,7 +30,7 @@ def replace(obj, replacements):
                 replace(value, replacements)
 
 
-def remove_alias(parsed_query):
+def remove_aliases(parsed_query):
     select = parsed_query['select']
     if isinstance(select, dict):
         select = [select]
@@ -38,6 +38,25 @@ def remove_alias(parsed_query):
     for clause in select:
         if 'name' in clause:
             del clause['name']
+
+
+def unalias_orderby(parsed_query):
+    if not 'orderby' in parsed_query:
+        return 
+
+    select = parsed_query['select']
+    if isinstance(select, dict):
+        select = [select]
+
+    alias_to_value = {
+        clause['name']: clause['value']
+        for clause in select
+        if isinstance(clause, dict) and 'name' in clause
+    }
+
+    for k, v in parsed_query['orderby'].items():
+        if isinstance(v, string_types) and v in alias_to_value:
+            parsed_query['orderby'][k] = alias_to_value[v]
 
 
 def extract_column_aliases(sql):
@@ -67,7 +86,8 @@ def translate(sql, column_map):
     if not isinstance(from_, string_types):
         raise NotSupportedError('FROM should be a URL')
 
-    remove_alias(parsed_query)
+    unalias_orderby(parsed_query)
+    remove_aliases(parsed_query)
     replace(parsed_query, column_map)
 
     return format(parsed_query)

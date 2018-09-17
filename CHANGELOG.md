@@ -9,3 +9,7 @@
 
 ## [0.1.2] - 2018-09-16
 - Add missing dependency to `moz-sql-parser` to `setup.py`.
+
+## [0.1.3] - 2018-09-16
+- Fix small bug in SQL Alchemy compiler.
+- Allow aliases in `ORDER BY`.

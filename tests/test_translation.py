@@ -106,6 +106,24 @@ class TranslationTestSuite(unittest.TestCase):
         result = extract_column_aliases(sql)
         self.assertEquals(result, expected)
 
+    def test_order_by_alias(self):
+        sql = '''
+    SELECT
+        country AS country
+      , SUM(cnt) AS "SUM(cnt)"
+    FROM
+        "https://example.com"
+    GROUP BY
+        country
+    ORDER BY
+        "SUM(cnt)"
+    DESC
+         LIMIT 10
+        '''
+        expected = 'SELECT A, SUM(B) GROUP BY A ORDER BY SUM(B) DESC LIMIT 10'
+        result = translate(sql, {'country': 'A', 'cnt': 'B'})
+        self.assertEquals(result, expected)
+
 
 if __name__ == '__main__':
     unittest.main()
