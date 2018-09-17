@@ -57,4 +57,22 @@ IN                 5
 
 ## SQLAlchemy support ##
 
-In progress.
+This module provides a SQLAlchemy dialect. You don't need to specify a URL, since the spreadsheet is extracted from the `FROM` clause:
+
+```python
+from sqlalchemy import *
+from sqlalchemy.engine import create_engine
+from sqlalchemy.schema import *
+
+engine = create_engine('gsheets://')
+inspector = inspect(engine)
+
+table = Table(
+    'https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/edit#gid=0',
+    MetaData(bind=engine),
+    autoload=True)
+query = select([func.count(table.columns.country)], from_obj=table)
+print(query.scalar())  # prints 3.0
+```
+
+Alternatively, you can initialize the engine with a "catalog". The catalog is a Google spreadsheet where each row points to another Google spreadsheet, with URL, number of headers and schema as the columns. You can see an example [here](https://docs.google.com/spreadsheets/d/1AAqVVSpGeyRZyrr4n--fb_IxhLwwKtLbjfu4h6MyyYA/edit#gid=0).

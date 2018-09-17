@@ -267,8 +267,8 @@ class Cursor(object):
         or `None` when no more data is available.
         """
         try:
-            return self.next()
-        except StopIteration:
+            return self._results.pop(0)
+        except IndexError:
             return None
 
     @check_result

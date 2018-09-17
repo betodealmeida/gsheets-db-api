@@ -46,7 +46,14 @@ def extract_column_aliases(sql):
     if isinstance(select, dict):
         select = [select]
 
-    return [clause.get('name') for clause in select]
+    aliases = []
+    for clause in select:
+        if isinstance(clause, dict):
+            aliases.append(clause.get('name'))
+        else:
+            aliases.append(None)
+
+    return aliases
 
 
 def translate(sql, column_map):
