@@ -116,7 +116,7 @@ def main():
     lexer = PygmentsLexer(SqlLexer)
     words = get_autocomplete(connection)
     completer = WordCompleter(words, ignore_case=True)
-    style = style_from_pygments_cls(get_style_by_name('monokai'))
+    style = style_from_pygments_cls(get_style_by_name('manni'))
 
     while True:
         try:
