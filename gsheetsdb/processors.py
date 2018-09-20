@@ -3,6 +3,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import warnings
+
 from six import string_types
 
 
@@ -72,6 +74,9 @@ class CountStar(Processor):
     pattern = SubsetMatcher({'select': {'value': {'count': '*'}}})
 
     def pre_process(self, parsed_query, column_map):
+        warnings.warn(
+            'COUNT(*) only works if at least one column has no NULLs')
+
         select = parsed_query['select']
         if not isinstance(select, list):
             select = [select]
