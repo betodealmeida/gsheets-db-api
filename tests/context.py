@@ -5,4 +5,5 @@ sys.path.insert(0, os.path.abspath(
 
 import gsheetsdb
 from gsheetsdb import exceptions
+from gsheetsdb.processors import CountStar, SubsetMatcher
 from gsheetsdb.translator import extract_column_aliases, translate
