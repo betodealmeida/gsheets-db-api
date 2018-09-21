@@ -42,6 +42,8 @@ development_extras = [
     'flake8',
     'nose',
     'pipreqs',
+    'pytest>=2.8',
+    'pytest-cov',
     'twine',
 ]
 
