@@ -4,9 +4,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from moz_sql_parser import parse, format
+import pyparsing
 from six import string_types
 
-from gsheetsdb.exceptions import NotSupportedError
+from gsheetsdb.exceptions import NotSupportedError, ProgrammingError
 
 
 def replace(obj, replacements):
@@ -60,7 +61,11 @@ def unalias_orderby(parsed_query):
 
 
 def extract_column_aliases(sql):
-    parsed_query = parse(sql)
+    try:
+        parsed_query = parse(sql)
+    except pyparsing.ParseException as e:
+        raise ProgrammingError(format_error(sql, e.lineno, e.col, str(e)))
+
     select = parsed_query['select']
     if isinstance(select, dict):
         select = [select]
@@ -75,8 +80,19 @@ def extract_column_aliases(sql):
     return aliases
 
 
+def format_error(query, line, column, detailed_message):
+    msg = query.split('\n')[:line]
+    msg.append('{indent}^'.format(indent=' ' * (column - 1)))
+    msg.append(detailed_message)
+    return '\n'.join(msg)
+
+
 def translate(sql, column_map):
-    parsed_query = parse(sql)
+    try:
+        parsed_query = parse(sql)
+    except pyparsing.ParseException as e:
+        raise ProgrammingError(format_error(sql, e.lineno, e.col, str(e)))
+    print(parsed_query)
 
     # HAVING is not supported
     if 'having' in parsed_query:
