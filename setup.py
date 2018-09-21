@@ -50,7 +50,8 @@ development_extras = [
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
 # Except, perhaps the License and Trove Classifiers!
-# If you do change the License, remember to change the Trove Classifier for that!
+# If you do change the License, remember to change the Trove Classifier for
+# that!
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -88,7 +89,8 @@ class UploadCommand(Command):
 
         self.status('Building Source and Wheel (universal) distribution…')
         os.system(
-            '{0} setup.py sdist bdist_wheel --universal'.format(sys.executable))
+            '{0} setup.py sdist bdist_wheel --universal'.format(
+                sys.executable))
 
         self.status('Uploading the package to PyPi via Twine…')
         os.system('twine upload dist/*')
@@ -130,13 +132,13 @@ setup(
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy'
     ],
