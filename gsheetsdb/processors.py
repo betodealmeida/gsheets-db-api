@@ -9,18 +9,24 @@ from six import string_types
 
 
 class JSONMatcher:
-    
-    def __init__(self, json):
+
+    def __init__(self, json=None):
         self.json = json
 
     def match(self, other):
         raise NotImplementedError('Subclasses should implement `match`')
 
 
+class DummyMatcher(JSONMatcher):
+
+    def match(self, other):
+        return False
+
+
 class SubsetMatcher(JSONMatcher):
 
     def match(self, other):
-       return is_subset(self.json, other) 
+        return is_subset(self.json, other)
 
 
 def is_subset(json, other):
@@ -41,7 +47,6 @@ def is_subset(json, other):
 
         for k, v in json.items():
             # each value should be a subset of the value in other
-            match = False
             for option in other:
                 if is_subset(v, option.get(k)):
                     break
@@ -51,15 +56,15 @@ def is_subset(json, other):
         return True
 
     elif isinstance(other, list):
-        return json in other 
+        return json in other
 
     else:
         return json == other
 
 
 class Processor:
-    
-    pattern = lambda parsed_query: False
+
+    pattern = DummyMatcher()
 
     @classmethod
     def match(cls, parsed_query):
@@ -98,11 +103,12 @@ class CountStar(Processor):
             new_select.append({'value': {'count': label}, 'name': alias})
 
         parsed_query['select'] = new_select
-        return parsed_query 
+        return parsed_query
 
     def post_process(self, payload, aliases):
         added_columns = [
-            alias and alias.startswith('__{0}__'.format(self.__class__.__name__))
+            alias and
+            alias.startswith('__{0}__'.format(self.__class__.__name__))
             for alias in aliases
         ]
         payload['table']['cols'] = [

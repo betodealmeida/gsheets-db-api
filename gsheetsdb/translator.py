@@ -3,11 +3,10 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from moz_sql_parser import parse, format
-import pyparsing
+from moz_sql_parser import format
 from six import string_types
 
-from gsheetsdb.exceptions import NotSupportedError, ProgrammingError
+from gsheetsdb.exceptions import NotSupportedError
 
 
 def replace(obj, replacements):
@@ -42,8 +41,8 @@ def remove_aliases(parsed_query):
 
 
 def unalias_orderby(parsed_query):
-    if not 'orderby' in parsed_query:
-        return 
+    if 'orderby' not in parsed_query:
+        return
 
     select = parsed_query['select']
     if isinstance(select, dict):

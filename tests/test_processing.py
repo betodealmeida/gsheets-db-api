@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from .context import CountStar, is_subset, SubsetMatcher
-
 import unittest
+import warnings
 
 from moz_sql_parser import format, parse
+
+from .context import CountStar, is_subset, SubsetMatcher
 
 
 class ProcessingTestSuite(unittest.TestCase):
@@ -17,7 +18,9 @@ class ProcessingTestSuite(unittest.TestCase):
         self.assertTrue(CountStar.match(parsed_query))
 
         processor = CountStar()
-        result = processor.pre_process(parsed_query, column_map)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            result = processor.pre_process(parsed_query, column_map)
         expected = parse('''
             SELECT
                 COUNT(country) AS __CountStar__country
@@ -25,8 +28,8 @@ class ProcessingTestSuite(unittest.TestCase):
             FROM
                 "http://example.com"
         ''')
-        self.assertEquals(result, expected)
-        self.assertEquals(processor.alias, 'total')
+        self.assertEqual(result, expected)
+        self.assertEqual(processor.alias, 'total')
 
         payload = {
             'status': 'ok',
@@ -56,7 +59,7 @@ class ProcessingTestSuite(unittest.TestCase):
                 'rows': [{'c': [{'v': 9.0}]}],
             },
         }
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_count_star_no_results(self):
         sql = 'SELECT COUNT(*) AS total FROM "http://example.com"'
@@ -64,7 +67,9 @@ class ProcessingTestSuite(unittest.TestCase):
         column_map = {'country': 'A', 'cnt': 'B'}
 
         processor = CountStar()
-        processor.pre_process(parsed_query, column_map)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            processor.pre_process(parsed_query, column_map)
 
         payload = {
             'status': 'ok',
@@ -87,7 +92,7 @@ class ProcessingTestSuite(unittest.TestCase):
                 'rows': [{'c': [{'v': 0}]}],
             },
         }
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_count_star_with_groupby(self):
         sql = 'SELECT country, COUNT(*) FROM "http://example.com" GROUP BY country'
@@ -98,7 +103,9 @@ class ProcessingTestSuite(unittest.TestCase):
 
         processor = CountStar()
 
-        result = processor.pre_process(parsed_query, column_map)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            result = processor.pre_process(parsed_query, column_map)
         expected = parse('''
             SELECT
                 country
@@ -109,8 +116,8 @@ class ProcessingTestSuite(unittest.TestCase):
             GROUP BY
                 country
         ''')
-        self.assertEquals(result, expected)
-        self.assertEquals(processor.alias, 'count star')
+        self.assertEqual(result, expected)
+        self.assertEqual(processor.alias, 'count star')
 
         payload = {
             'status': 'ok',
@@ -141,7 +148,7 @@ class ProcessingTestSuite(unittest.TestCase):
                 ],
             },
         }
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_subset_matcher(self):
         pattern = SubsetMatcher({'select': {'value': {'count': '*'}}})

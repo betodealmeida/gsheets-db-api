@@ -23,9 +23,6 @@ from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.lexers import PygmentsLexer
 from prompt_toolkit.styles.pygments import style_from_pygments_cls
 from pygments.lexers import SqlLexer
-from pygments.style import Style
-from pygments.token import Token
-from pygments.styles.default import DefaultStyle
 from pygments.styles import get_style_by_name
 from six.moves.urllib import parse
 from tabulate import tabulate

@@ -98,4 +98,4 @@ class ConvertTestSuite(unittest.TestCase):
                 string='test',
             ),
         ]
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)

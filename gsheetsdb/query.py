@@ -4,7 +4,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import json
-from moz_sql_parser import parse as parse_sql
 import pyparsing
 import requests
 from six.moves.urllib import parse
@@ -72,9 +71,10 @@ def get_description_from_payload(payload):
 
 def execute(query, headers=0):
     try:
-        parsed_query = parse(sql)
+        parsed_query = parse(query)
     except pyparsing.ParseException as e:
-        raise ProgrammingError(format_moz_error(sql, e.lineno, e.col, str(e)))
+        raise ProgrammingError(
+            format_moz_error(query, e.lineno, e.col, str(e)))
 
     # fetch aliases, since they will be removed by the translator
     original_aliases = extract_column_aliases(parsed_query)
@@ -116,9 +116,9 @@ def execute(query, headers=0):
             col['label'] = alias
 
     description = get_description_from_payload(payload)
-    
+
     # convert rows to proper type (datetime, eg)
     rows = payload['table']['rows']
     results = convert_rows(cols, rows)
 
-    return results, description 
+    return results, description

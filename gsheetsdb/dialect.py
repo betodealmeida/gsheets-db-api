@@ -10,7 +10,6 @@ from sqlalchemy.sql import compiler
 from sqlalchemy import types
 
 import gsheetsdb
-from gsheetsdb import exceptions
 
 
 type_map = {
