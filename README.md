@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/betodealmeida/gsheets-db-api.svg?branch=master)](https://travis-ci.org/betodealmeida/gsheets-db-api)
+
 # A Python DB API 2.0 for Google Spreadsheets #
 
 This module allows you to query Google Spreadsheets using SQL.
