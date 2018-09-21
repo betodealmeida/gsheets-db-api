@@ -22,11 +22,11 @@ class ProcessingTestSuite(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             result = processor.pre_process(
-                parsed_query, OrderedDict(column_map))
+                parsed_query, OrderedDict(sorted(column_map.items())))
         expected = parse('''
             SELECT
-                COUNT(country) AS __CountStar__country
-              , COUNT(cnt) AS __CountStar__cnt
+                COUNT(cnt) AS __CountStar__cnt
+              , COUNT(country) AS __CountStar__country
             FROM
                 "http://example.com"
         ''')
@@ -75,7 +75,8 @@ class ProcessingTestSuite(unittest.TestCase):
         processor = CountStar()
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            processor.pre_process(parsed_query, OrderedDict(column_map))
+            processor.pre_process(
+                parsed_query, OrderedDict(sorted(column_map.items())))
 
         payload = {
             'status': 'ok',
