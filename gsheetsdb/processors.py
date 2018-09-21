@@ -90,7 +90,8 @@ class CountStar(Processor):
 
         # count each column
         for label in column_map:
-            alias = '__{ns}__{label}'.format(ns=self.__class__.__name__, label=label)
+            alias = '__{namespace}__{label}'.format(
+                namespace=self.__class__.__name__, label=label)
             new_select.append({'value': {'count': label}, 'name': alias})
 
         parsed_query['select'] = new_select
@@ -120,6 +121,10 @@ class CountStar(Processor):
                 if not added
             ]
             row['c'].append({'v': count_star})
+
+        # the API returns no rows when the count is zero
+        if not payload['table']['rows']:
+            payload['table']['rows'].append({'c': [{'v': 0}]})
 
         return payload
 
