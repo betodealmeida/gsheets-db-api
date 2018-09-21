@@ -6,10 +6,21 @@ import warnings
 
 from moz_sql_parser import parse
 
-from .context import CountStar, is_subset, SubsetMatcher
+from .context import CountStar, is_subset, Processor, SubsetMatcher
 
 
 class ProcessingTestSuite(unittest.TestCase):
+
+    def test_processor(self):
+        processor = Processor()
+        sql = 'SELECT * FROM "http://example.com"'
+        parsed_query = parse(sql)
+        payload = {}
+
+        # a base processor never matches, and doesn't do anything
+        self.assertFalse(processor.match({}))
+        self.assertEqual(parsed_query, processor.pre_process(parsed_query, {}))
+        self.assertEqual(payload, processor.post_process(payload, [None]))
 
     def test_count_star(self):
         sql = 'SELECT COUNT(*) AS total FROM "http://example.com"'

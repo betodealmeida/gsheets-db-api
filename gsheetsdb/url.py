@@ -19,7 +19,9 @@ def get_url(url, headers=0, gid=0, sheet=None):
     if 'headers' in qs:
         headers = int(qs['headers'][-1])
     if 'gid' in qs:
-        gid = qs['gid'][0]
+        gid = qs['gid'][-1]
+    if 'sheet' in qs:
+        sheet = qs['sheet'][-1]
 
     if parts.fragment.startswith('gid='):
         gid = parts.fragment[len('gid='):]

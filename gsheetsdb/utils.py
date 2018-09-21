@@ -9,11 +9,15 @@ import re
 POSITION = re.compile('at line (?P<line>\d+), column (?P<column>\d+)')
 
 
-def format_moz_error(query, line, column, detailed_message):
+def format_moz_error(query, exception):
     """
     Format syntax error when parsing the original query.
 
     """
+    line = exception.lineno
+    column = exception.col
+    detailed_message = str(exception)
+
     msg = query.split('\n')[:line]
     msg.append('{indent}^'.format(indent=' ' * (column - 1)))
     msg.append(detailed_message)

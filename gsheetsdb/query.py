@@ -4,6 +4,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import json
+from moz_sql_parser import parse as parse_sql
 import pyparsing
 import requests
 from six.moves.urllib import parse
@@ -17,7 +18,7 @@ from gsheetsdb.url import extract_url, get_url
 from gsheetsdb.utils import format_gsheet_error, format_moz_error
 
 
-# the JSON payloads has this in the beginning
+# the JSON payload has this in the beginning
 LEADING = ")]}'\n"
 
 
@@ -71,10 +72,9 @@ def get_description_from_payload(payload):
 
 def execute(query, headers=0):
     try:
-        parsed_query = parse(query)
+        parsed_query = parse_sql(query)
     except pyparsing.ParseException as e:
-        raise ProgrammingError(
-            format_moz_error(query, e.lineno, e.col, str(e)))
+        raise ProgrammingError(format_moz_error(query, e))
 
     # fetch aliases, since they will be removed by the translator
     original_aliases = extract_column_aliases(parsed_query)

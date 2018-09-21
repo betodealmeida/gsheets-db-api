@@ -71,10 +71,10 @@ class Processor:
         return cls.pattern.match(parsed_query)
 
     def pre_process(self, parsed_query, column_map):
-        raise NotImplementedError('Subclasses should implement `pre_process`')
+        return parsed_query
 
     def post_process(self, payload, aliases):
-        raise NotImplementedError('Subclasses should implement `post_process`')
+        return payload
 
 
 class CountStar(Processor):
