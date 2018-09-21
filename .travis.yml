@@ -12,6 +12,7 @@ matrix:
       sudo: true
 
 install:
+    - pip install --user codecov
     - pip install git+https://github.com/betodealmeida/moz-sql-parser.git@fix_empty_functions
     - pip install -e .[cli,dev,sqlalchemy]
 
@@ -19,3 +20,5 @@ script:
     - flake8
     - py.test --cov=gsheetsdb/
 
+after_success:
+  - codecov

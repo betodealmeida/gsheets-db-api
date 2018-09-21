@@ -14,15 +14,14 @@ class ProcessingTestSuite(unittest.TestCase):
     def test_count_star(self):
         sql = 'SELECT COUNT(*) AS total FROM "http://example.com"'
         parsed_query = parse(sql)
-        column_map = {'country': 'A', 'cnt': 'B'}
+        column_map = OrderedDict(sorted({'country': 'A', 'cnt': 'B'}.items()))
 
         self.assertTrue(CountStar.match(parsed_query))
 
         processor = CountStar()
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            result = processor.pre_process(
-                parsed_query, OrderedDict(sorted(column_map.items())))
+            result = processor.pre_process(parsed_query, column_map)
         expected = parse('''
             SELECT
                 COUNT(cnt) AS __CountStar__cnt
@@ -70,13 +69,12 @@ class ProcessingTestSuite(unittest.TestCase):
     def test_count_star_no_results(self):
         sql = 'SELECT COUNT(*) AS total FROM "http://example.com"'
         parsed_query = parse(sql)
-        column_map = {'country': 'A', 'cnt': 'B'}
+        column_map = OrderedDict(sorted({'country': 'A', 'cnt': 'B'}.items()))
 
         processor = CountStar()
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            processor.pre_process(
-                parsed_query, OrderedDict(sorted(column_map.items())))
+            processor.pre_process(parsed_query, column_map)
 
         payload = {
             'status': 'ok',
@@ -111,7 +109,7 @@ class ProcessingTestSuite(unittest.TestCase):
             'GROUP BY country'
         )
         parsed_query = parse(sql)
-        column_map = {'country': 'A', 'cnt': 'B'}
+        column_map = OrderedDict(sorted({'country': 'A', 'cnt': 'B'}.items()))
 
         self.assertTrue(CountStar.match(parsed_query))
 
@@ -123,8 +121,8 @@ class ProcessingTestSuite(unittest.TestCase):
         expected = parse('''
             SELECT
                 country
-              , COUNT(country) AS __CountStar__country
               , COUNT(cnt) AS __CountStar__cnt
+              , COUNT(country) AS __CountStar__country
             FROM
                 "http://example.com"
             GROUP BY
