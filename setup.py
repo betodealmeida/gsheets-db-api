@@ -39,6 +39,7 @@ cli_extras = [
 
 development_extras = [
     'coverage',
+    'flake8',
     'nose',
     'pipreqs',
     'twine',
