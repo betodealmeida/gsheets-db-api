@@ -16,3 +16,7 @@
 
 ## [0.1.4] - 2018-09-16
 - Fix `visit_column` method.
+
+## [0.1.5] - 
+- Parse dates, better error message.
+- `COUNT(*)` working.

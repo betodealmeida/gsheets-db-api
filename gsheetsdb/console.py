@@ -1,7 +1,7 @@
 """Google Spreadsheets CLI
 
 Usage:
-  gsheetsdb [--headers=<headers>]
+  gsheetsdb [--headers=<headers>] [--raise]
   gsheetsdb (-h | --help)
   gsheetsdb --version
 
@@ -133,6 +133,8 @@ def main():
                 result = cursor.execute(query, headers=headers)
             except Exception as e:
                 print(e)
+                if arguments['--raise']:
+                    raise
                 continue
 
             columns = [t[0] for t in cursor.description or []]

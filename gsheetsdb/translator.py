@@ -60,12 +60,7 @@ def unalias_orderby(parsed_query):
             parsed_query['orderby'][k] = alias_to_value[v]
 
 
-def extract_column_aliases(sql):
-    try:
-        parsed_query = parse(sql)
-    except pyparsing.ParseException as e:
-        raise ProgrammingError(format_error(sql, e.lineno, e.col, str(e)))
-
+def extract_column_aliases(parsed_query):
     select = parsed_query['select']
     if isinstance(select, dict):
         select = [select]
@@ -80,19 +75,9 @@ def extract_column_aliases(sql):
     return aliases
 
 
-def format_error(query, line, column, detailed_message):
-    msg = query.split('\n')[:line]
-    msg.append('{indent}^'.format(indent=' ' * (column - 1)))
-    msg.append(detailed_message)
-    return '\n'.join(msg)
-
-
-def translate(sql, column_map):
-    try:
-        parsed_query = parse(sql)
-    except pyparsing.ParseException as e:
-        raise ProgrammingError(format_error(sql, e.lineno, e.col, str(e)))
-    print(parsed_query)
+def translate(parsed_query, column_map=None):
+    if column_map is None:
+        column_map = {}
 
     # HAVING is not supported
     if 'having' in parsed_query:

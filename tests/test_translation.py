@@ -12,31 +12,31 @@ class TranslationTestSuite(unittest.TestCase):
     def test_select(self):
         sql = 'SELECT country FROM "http://example.com"'
         expected = "SELECT A"
-        result = translate(sql, {'country': 'A'})
+        result = translate(parse(sql), {'country': 'A'})
         self.assertEquals(result, expected)
 
     def test_from(self):
         sql = 'SELECT * FROM table'
         expected = 'SELECT *'
-        result = translate(sql, {})
+        result = translate(parse(sql), {})
         self.assertEquals(result, expected)
 
     def test_where(self):
         sql = 'SELECT country FROM "http://example.com" WHERE cnt > 10'
         expected = 'SELECT A WHERE B > 10'
-        result = translate(sql, {'country': 'A', 'cnt': 'B'})
+        result = translate(parse(sql), {'country': 'A', 'cnt': 'B'})
         self.assertEquals(result, expected)
 
     def test_where_groupby(self):
         sql = '''SELECT country, SUM(cnt) FROM "http://example.com" WHERE country != 'US' GROUP BY country'''
         expected = "SELECT A, SUM(B) WHERE A <> 'US' GROUP BY A"
-        result = translate(sql, {'country': 'A', 'cnt': 'B'})
+        result = translate(parse(sql), {'country': 'A', 'cnt': 'B'})
         self.assertEquals(result, expected)
 
     def test_groupby(self):
         sql = 'SELECT country, SUM(cnt) FROM "http://example.com" GROUP BY country'
         expected = "SELECT A, SUM(B) GROUP BY A"
-        result = translate(sql, {'country': 'A', 'cnt': 'B'})
+        result = translate(parse(sql), {'country': 'A', 'cnt': 'B'})
         self.assertEquals(result, expected)
 
     def test_having(self):
@@ -52,7 +52,12 @@ class TranslationTestSuite(unittest.TestCase):
         COUNT(*) > 0
         '''
         with self.assertRaises(exceptions.NotSupportedError):
-            result = translate(sql, {'country': 'A', 'cnt': 'B'})
+            result = translate(parse(sql), {'country': 'A', 'cnt': 'B'})
+
+    def test_subquery(self):
+        sql = 'SELECT * from XYZZY, ABC'
+        with self.assertRaises(exceptions.NotSupportedError):
+            result = translate(parse(sql))
 
     def test_orderby(self):
         sql = '''
@@ -67,43 +72,55 @@ class TranslationTestSuite(unittest.TestCase):
         SUM(cnt)
         '''
         expected = "SELECT A, SUM(B) GROUP BY A ORDER BY SUM(B)"
-        result = translate(sql, {'country': 'A', 'cnt': 'B'})
+        result = translate(parse(sql), {'country': 'A', 'cnt': 'B'})
         self.assertEquals(result, expected)
 
     def test_limit(self):
         sql = 'SELECT country FROM "http://example.com" LIMIT 10'
         expected = 'SELECT A LIMIT 10'
-        result = translate(sql, {'country': 'A'})
+        result = translate(parse(sql), {'country': 'A'})
         self.assertEquals(result, expected)
 
     def test_where(self):
         sql = 'SELECT country FROM "http://example.com" LIMIT 10 OFFSET 5'
         expected = 'SELECT A LIMIT 10 OFFSET 5'
-        result = translate(sql, {'country': 'A'})
+        result = translate(parse(sql), {'country': 'A'})
         self.assertEquals(result, expected)
 
     def test_alias(self):
         sql = 'SELECT SUM(cnt) AS total FROM "http://example.com"'
         expected = 'SELECT SUM(B)'
-        result = translate(sql, {'cnt': 'B'})
+        result = translate(parse(sql), {'cnt': 'B'})
         self.assertEquals(result, expected)
 
     def test_multiple_aliases(self):
         sql = 'SELECT country AS dim1, SUM(cnt) AS total FROM "http://example.com" GROUP BY country'
         expected = 'SELECT A, SUM(B) GROUP BY A'
-        result = translate(sql, {'country': 'A', 'cnt': 'B'})
+        result = translate(parse(sql), {'country': 'A', 'cnt': 'B'})
+        self.assertEquals(result, expected)
+
+    def test_unalias_orderby(self):
+        sql = 'SELECT cnt AS value FROM "http://example.com" ORDER BY value'
+        expected = 'SELECT B ORDER BY B'
+        result = translate(parse(sql), {'cnt': 'B'})
         self.assertEquals(result, expected)
 
     def test_column_aliases(self):
         sql = 'SELECT SUM(cnt) AS total FROM "http://example.com"'
         expected = ['total']
-        result = extract_column_aliases(sql)
+        result = extract_column_aliases(parse(sql))
+        self.assertEquals(result, expected)
+
+    def test_column_aliases_star(self):
+        sql = 'SELECT * FROM "http://example.com"'
+        expected = [None]
+        result = extract_column_aliases(parse(sql))
         self.assertEquals(result, expected)
 
     def test_column_aliases_multiple(self):
         sql = 'SELECT SUM(cnt) AS total, country, gender AS dim1 FROM "http://example.com"'
         expected = ['total', None, 'dim1']
-        result = extract_column_aliases(sql)
+        result = extract_column_aliases(parse(sql))
         self.assertEquals(result, expected)
 
     def test_order_by_alias(self):
@@ -121,7 +138,7 @@ class TranslationTestSuite(unittest.TestCase):
          LIMIT 10
         '''
         expected = 'SELECT A, SUM(B) GROUP BY A ORDER BY SUM(B) DESC LIMIT 10'
-        result = translate(sql, {'country': 'A', 'cnt': 'B'})
+        result = translate(parse(sql), {'country': 'A', 'cnt': 'B'})
         self.assertEquals(result, expected)
 
 

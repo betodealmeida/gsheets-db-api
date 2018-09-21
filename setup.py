@@ -38,6 +38,7 @@ cli_extras = [
 ]
 
 development_extras = [
+    'coverage',
     'nose',
     'pipreqs',
     'twine',
@@ -110,7 +111,7 @@ setup(
             'gsheetsdb = gsheetsdb.console:main',
         ],
         'sqlalchemy.dialects': [
-            'gsheets = gsheetsdb.sqla:GSheetsDialect',
+            'gsheets = gsheetsdb.dialect:GSheetsDialect',
         ],
     },
     install_requires=REQUIRED,
