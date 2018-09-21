@@ -108,7 +108,7 @@ class CountStar(Processor):
             if not added
         ]
         payload['table']['cols'].append(
-            {'id': 'count-star', 'label': self.alias, 'type':'number'})
+            {'id': 'count-star', 'label': self.alias, 'type': 'number'})
 
         for row in payload['table']['rows']:
             values = [
