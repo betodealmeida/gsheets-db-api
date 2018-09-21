@@ -7,7 +7,6 @@ import unittest
 from .context import convert_rows
 
 
-
 class ConvertTestSuite(unittest.TestCase):
 
     payload = {
@@ -39,12 +38,14 @@ class ConvertTestSuite(unittest.TestCase):
                     "label": "date",
                     "type": "date",
                     "pattern": "M/d/yyyy",
-                },{
+                },
+                {
                     "id": "E",
                     "label": "timeofday",
                     "type": "timeofday",
                     "pattern": "h:mm:ss am/pm",
-                },{
+                },
+                {
                     "id": "F",
                     "label": "string",
                     "type": "string",
@@ -57,7 +58,7 @@ class ConvertTestSuite(unittest.TestCase):
                         {"v": 1.0, "f": "1"},
                         {"v": True, "f": "TRUE"},
                         {"v": "Date(2018,0,1)", "f": "1/1/2018"},
-                        {"v": [17,0,0,0], "f": "5:00:00 PM"},
+                        {"v": [17, 0, 0, 0], "f": "5:00:00 PM"},
                         {"v": "test"},
                     ],
                 },
@@ -79,7 +80,8 @@ class ConvertTestSuite(unittest.TestCase):
         cols = self.payload['table']['cols']
         rows = self.payload['table']['rows']
         result = convert_rows(cols, rows)
-        Row = namedtuple('Row', 'datetime number boolean date timeofday string')
+        Row = namedtuple(
+            'Row', 'datetime number boolean date timeofday string')
         expected = [
             Row(
                 datetime=datetime.datetime(2018, 9, 1, 0, 0),

@@ -3,7 +3,7 @@
 import unittest
 import warnings
 
-from moz_sql_parser import format, parse
+from moz_sql_parser import parse
 
 from .context import CountStar, is_subset, SubsetMatcher
 
@@ -35,7 +35,11 @@ class ProcessingTestSuite(unittest.TestCase):
             'status': 'ok',
             'table': {
                 'cols': [
-                    {'id': 'count-A', 'label': 'count country', 'type': 'number'},
+                    {
+                        'id': 'count-A',
+                        'label': 'count country',
+                        'type': 'number',
+                    },
                     {'id': 'count-B', 'label': 'count cnt', 'type': 'number'},
                 ],
                 'rows': [
@@ -75,7 +79,11 @@ class ProcessingTestSuite(unittest.TestCase):
             'status': 'ok',
             'table': {
                 'cols': [
-                    {'id': 'count-A', 'label': 'count country', 'type': 'number'},
+                    {
+                        'id': 'count-A',
+                        'label': 'count country',
+                        'type': 'number',
+                    },
                     {'id': 'count-B', 'label': 'count cnt', 'type': 'number'},
                 ],
                 'rows': [],
@@ -95,7 +103,10 @@ class ProcessingTestSuite(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_count_star_with_groupby(self):
-        sql = 'SELECT country, COUNT(*) FROM "http://example.com" GROUP BY country'
+        sql = (
+            'SELECT country, COUNT(*) FROM "http://example.com" '
+            'GROUP BY country'
+        )
         parsed_query = parse(sql)
         column_map = {'country': 'A', 'cnt': 'B'}
 
@@ -124,7 +135,11 @@ class ProcessingTestSuite(unittest.TestCase):
             'table': {
                 'cols': [
                     {'id': 'A', 'label': 'country', 'type': 'string'},
-                    {'id': 'count-B', 'label': 'count country', 'type': 'number'},
+                    {
+                        'id': 'count-B',
+                        'label': 'count country',
+                        'type': 'number',
+                    },
                     {'id': 'count-C', 'label': 'count cnt', 'type': 'number'},
                 ],
                 'rows': [
@@ -140,7 +155,11 @@ class ProcessingTestSuite(unittest.TestCase):
             'table': {
                 'cols': [
                     {'id': 'A', 'label': 'country', 'type': 'string'},
-                    {'id': 'count-star', 'label': 'count star', 'type': 'number'},
+                    {
+                        'id': 'count-star',
+                        'label': 'count star',
+                        'type': 'number',
+                    },
                 ],
                 'rows': [
                     {'c': [{'v': 'BR'}, {'v': 4.0}]},
@@ -169,7 +188,8 @@ class ProcessingTestSuite(unittest.TestCase):
         self.assertFalse(pattern.match(parsed_query))
 
         parsed_query = parse(
-            'SELECT country, COUNT(*) FROM "http://example.com" GROUP BY country')
+            'SELECT country, COUNT(*) FROM "http://example.com" '
+            'GROUP BY country')
         self.assertTrue(pattern.match(parsed_query))
 
     def test_is_subset(self):

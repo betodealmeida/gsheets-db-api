@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from .context import exceptions, extract_column_aliases, gsheetsdb, translate
-
 import unittest
 
-from moz_sql_parser import parse, format
+from moz_sql_parser import parse
+
+from .context import exceptions, extract_column_aliases, translate
 
 
 class TranslationTestSuite(unittest.TestCase):
@@ -28,13 +28,26 @@ class TranslationTestSuite(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_where_groupby(self):
-        sql = '''SELECT country, SUM(cnt) FROM "http://example.com" WHERE country != 'US' GROUP BY country'''
+        sql = '''
+            SELECT
+                country
+              , SUM(cnt)
+            FROM
+                "http://example.com"
+            WHERE
+                country != 'US'
+            GROUP BY
+                country
+        '''
         expected = "SELECT A, SUM(B) WHERE A <> 'US' GROUP BY A"
         result = translate(parse(sql), {'country': 'A', 'cnt': 'B'})
         self.assertEqual(result, expected)
 
     def test_groupby(self):
-        sql = 'SELECT country, SUM(cnt) FROM "http://example.com" GROUP BY country'
+        sql = (
+            'SELECT country, SUM(cnt) FROM "http://example.com" '
+            'GROUP BY country'
+        )
         expected = "SELECT A, SUM(B) GROUP BY A"
         result = translate(parse(sql), {'country': 'A', 'cnt': 'B'})
         self.assertEqual(result, expected)
@@ -52,12 +65,12 @@ class TranslationTestSuite(unittest.TestCase):
         COUNT(*) > 0
         '''
         with self.assertRaises(exceptions.NotSupportedError):
-            result = translate(parse(sql), {'country': 'A', 'cnt': 'B'})
+            translate(parse(sql), {'country': 'A', 'cnt': 'B'})
 
     def test_subquery(self):
         sql = 'SELECT * from XYZZY, ABC'
         with self.assertRaises(exceptions.NotSupportedError):
-            result = translate(parse(sql))
+            translate(parse(sql))
 
     def test_orderby(self):
         sql = '''
@@ -81,7 +94,7 @@ class TranslationTestSuite(unittest.TestCase):
         result = translate(parse(sql), {'country': 'A'})
         self.assertEqual(result, expected)
 
-    def test_where(self):
+    def test_offset(self):
         sql = 'SELECT country FROM "http://example.com" LIMIT 10 OFFSET 5'
         expected = 'SELECT A LIMIT 10 OFFSET 5'
         result = translate(parse(sql), {'country': 'A'})
@@ -94,7 +107,10 @@ class TranslationTestSuite(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_multiple_aliases(self):
-        sql = 'SELECT country AS dim1, SUM(cnt) AS total FROM "http://example.com" GROUP BY country'
+        sql = (
+            'SELECT country AS dim1, SUM(cnt) AS total '
+            'FROM "http://example.com" GROUP BY country'
+        )
         expected = 'SELECT A, SUM(B) GROUP BY A'
         result = translate(parse(sql), {'country': 'A', 'cnt': 'B'})
         self.assertEqual(result, expected)
@@ -118,7 +134,10 @@ class TranslationTestSuite(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_column_aliases_multiple(self):
-        sql = 'SELECT SUM(cnt) AS total, country, gender AS dim1 FROM "http://example.com"'
+        sql = (
+            'SELECT SUM(cnt) AS total, country, gender AS dim1 '
+            'FROM "http://example.com"'
+        )
         expected = ['total', None, 'dim1']
         result = extract_column_aliases(parse(sql))
         self.assertEqual(result, expected)
