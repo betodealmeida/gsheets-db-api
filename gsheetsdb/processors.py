@@ -102,7 +102,7 @@ class CountStar(Processor):
 
     def post_process(self, payload, aliases):
         added_columns = [
-            alias.startswith('__{0}__'.format(self.__class__.__name__))
+            alias and alias.startswith('__{0}__'.format(self.__class__.__name__))
             for alias in aliases
         ]
         payload['table']['cols'] = [
