@@ -1,4 +1,8 @@
-[![Build Status](https://travis-ci.org/betodealmeida/gsheets-db-api.svg?branch=master)](https://travis-ci.org/betodealmeida/gsheets-db-api)
+[![Build Status](https://travis-ci.org/betodealmeida/gsheets-db-api.svg?branch=master)](https://travis-ci.org/betodealmeida/gsheets-db-api) 
+
+[![codecov](https://codecov.io/gh/betodealmeida/gsheets-db-api/branch/master/graph/badge.svg)](https://codecov.io/gh/betodealmeida/gsheets-db-api)
+
+
 
 # A Python DB API 2.0 for Google Spreadsheets #
 
