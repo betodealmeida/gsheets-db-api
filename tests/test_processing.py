@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from collections import OrderedDict
 import unittest
 import warnings
 
@@ -20,7 +21,8 @@ class ProcessingTestSuite(unittest.TestCase):
         processor = CountStar()
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            result = processor.pre_process(parsed_query, column_map)
+            result = processor.pre_process(
+                parsed_query, OrderedDict(column_map))
         expected = parse('''
             SELECT
                 COUNT(country) AS __CountStar__country
@@ -73,7 +75,7 @@ class ProcessingTestSuite(unittest.TestCase):
         processor = CountStar()
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            processor.pre_process(parsed_query, column_map)
+            processor.pre_process(parsed_query, OrderedDict(column_map))
 
         payload = {
             'status': 'ok',
