@@ -9,9 +9,6 @@ import datetime
 
 def parse_datetime(v):
     """Parse a string like 'Date(2018,0,1,0,0,0)'"""
-    if v is None:
-        return None
-
     args = [int(number) for number in v[len('Date('):-1].split(',')]
     args[1] += 1  # month is zero indexed in the response
     return datetime.datetime(*args)
@@ -19,18 +16,12 @@ def parse_datetime(v):
 
 def parse_date(v):
     """Parse a string like 'Date(2018,0,1)'"""
-    if v is None:
-        return None
-
     args = [int(number) for number in v[len('Date('):-1].split(',')]
     args[1] += 1  # month is zero indexed in the response
     return datetime.date(*args)
 
 
 def parse_timeofday(v):
-    if v is None:
-        return None
-
     return datetime.time(*v)
 
 

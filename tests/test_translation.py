@@ -54,6 +54,11 @@ class TranslationTestSuite(unittest.TestCase):
         with self.assertRaises(exceptions.NotSupportedError):
             result = translate(parse(sql), {'country': 'A', 'cnt': 'B'})
 
+    def test_subquery(self):
+        sql = 'SELECT * from XYZZY, ABC'
+        with self.assertRaises(exceptions.NotSupportedError):
+            result = translate(parse(sql))
+
     def test_orderby(self):
         sql = '''
     SELECT
@@ -94,9 +99,21 @@ class TranslationTestSuite(unittest.TestCase):
         result = translate(parse(sql), {'country': 'A', 'cnt': 'B'})
         self.assertEquals(result, expected)
 
+    def test_unalias_orderby(self):
+        sql = 'SELECT cnt AS value FROM "http://example.com" ORDER BY value'
+        expected = 'SELECT B ORDER BY B'
+        result = translate(parse(sql), {'cnt': 'B'})
+        self.assertEquals(result, expected)
+
     def test_column_aliases(self):
         sql = 'SELECT SUM(cnt) AS total FROM "http://example.com"'
         expected = ['total']
+        result = extract_column_aliases(parse(sql))
+        self.assertEquals(result, expected)
+
+    def test_column_aliases_star(self):
+        sql = 'SELECT * FROM "http://example.com"'
+        expected = [None]
         result = extract_column_aliases(parse(sql))
         self.assertEquals(result, expected)
 

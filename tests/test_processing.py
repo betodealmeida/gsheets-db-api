@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .context import CountStar, SubsetMatcher
+from .context import CountStar, is_subset, SubsetMatcher
 
 import unittest
 
@@ -54,6 +54,37 @@ class ProcessingTestSuite(unittest.TestCase):
                     {'id': 'count-star', 'label': 'total', 'type': 'number'},
                 ],
                 'rows': [{'c': [{'v': 9.0}]}],
+            },
+        }
+        self.assertEquals(result, expected)
+
+    def test_count_star_no_results(self):
+        sql = 'SELECT COUNT(*) AS total FROM "http://example.com"'
+        parsed_query = parse(sql)
+        column_map = {'country': 'A', 'cnt': 'B'}
+
+        processor = CountStar()
+        processor.pre_process(parsed_query, column_map)
+
+        payload = {
+            'status': 'ok',
+            'table': {
+                'cols': [
+                    {'id': 'count-A', 'label': 'count country', 'type': 'number'},
+                    {'id': 'count-B', 'label': 'count cnt', 'type': 'number'},
+                ],
+                'rows': [],
+            },
+        }
+        aliases = ['__CountStar__country', '__CountStar__cnt']
+        result = processor.post_process(payload, aliases)
+        expected = {
+            'status': 'ok',
+            'table': {
+                'cols': [
+                    {'id': 'count-star', 'label': 'total', 'type': 'number'},
+                ],
+                'rows': [{'c': [{'v': 0}]}],
             },
         }
         self.assertEquals(result, expected)
@@ -133,3 +164,15 @@ class ProcessingTestSuite(unittest.TestCase):
         parsed_query = parse(
             'SELECT country, COUNT(*) FROM "http://example.com" GROUP BY country')
         self.assertTrue(pattern.match(parsed_query))
+
+    def test_is_subset(self):
+        json = [1, 2, 3]
+
+        other = [1, 2, 3, 4]
+        self.assertTrue(is_subset(json, other))
+
+        other = 1
+        self.assertFalse(is_subset(json, other))
+
+        other = [1, 3, 4]
+        self.assertFalse(is_subset(json, other))

@@ -74,7 +74,10 @@ def extract_column_aliases(parsed_query):
     return aliases
 
 
-def translate(parsed_query, column_map):
+def translate(parsed_query, column_map=None):
+    if column_map is None:
+        column_map = {}
+
     # HAVING is not supported
     if 'having' in parsed_query:
         raise NotSupportedError('HAVING not supported')

@@ -50,6 +50,9 @@ def is_subset(json, other):
 
         return True
 
+    elif isinstance(other, list):
+        return json in other 
+
     else:
         return json == other
 
