@@ -24,7 +24,6 @@ from prompt_toolkit.lexers import PygmentsLexer
 from prompt_toolkit.styles.pygments import style_from_pygments_cls
 from pygments.lexers import SqlLexer
 from pygments.styles import get_style_by_name
-from six.moves.urllib import parse
 from tabulate import tabulate
 
 from gsheetsdb import connect, __version__

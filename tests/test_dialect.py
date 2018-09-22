@@ -40,6 +40,15 @@ class DialectTestSuite(unittest.TestCase):
         self.assertEqual(
             dialect.url, '{0}://example.com/'.format(dialect.scheme))
 
+    def test_get_schema_names_no_catalog(self):
+        connection = connect()
+        dialect = GSheetsDialect()
+        url = make_url('gsheets://')
+        dialect.create_connect_args(url)
+        result = dialect.get_schema_names(connection)
+        expected = []
+        self.assertEqual(result, expected)
+
     def test_get_view_names(self):
         connection = connect()
         dialect = GSheetsDialect()
