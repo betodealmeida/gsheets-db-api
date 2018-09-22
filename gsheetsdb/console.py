@@ -81,27 +81,6 @@ scalar_functions = [
 ]
 
 
-def get_connection_kwargs(url):
-    parts = parse.urlparse(url)
-    if ':' in parts.netloc:
-        host, port = parts.netloc.split(':', 1)
-        port = int(port)
-    else:
-        host = parts.netloc
-        port = 8082
-
-    return {
-        'host': host,
-        'port': port,
-        'path': parts.path,
-        'scheme': parts.scheme,
-    }
-
-
-def get_autocomplete(connection):
-    return keywords + aggregate_functions + scalar_functions
-
-
 def main():
     history = FileHistory(os.path.expanduser('~/.gsheetsdb_history'))
 
@@ -111,7 +90,7 @@ def main():
     cursor = connection.cursor()
 
     lexer = PygmentsLexer(SqlLexer)
-    words = get_autocomplete(connection)
+    words = keywords + aggregate_functions + scalar_functions
     completer = WordCompleter(words, ignore_case=True)
     style = style_from_pygments_cls(get_style_by_name('manni'))
 
@@ -129,16 +108,12 @@ def main():
             try:
                 result = cursor.execute(query, headers=headers)
             except Exception as e:
-                print(e)
                 if arguments['--raise']:
                     raise
+                print(e)
                 continue
 
             columns = [t[0] for t in cursor.description or []]
             print(tabulate(result, headers=columns))
 
     print('GoodBye!')
-
-
-if __name__ == '__main__':
-    main()
