@@ -3,8 +3,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from six.moves.urllib import parse
+from collections import OrderedDict
 
+from six.moves.urllib import parse
 from sqlalchemy.engine import default
 from sqlalchemy.sql import compiler
 from sqlalchemy import types
@@ -28,7 +29,7 @@ def add_headers(url, headers):
         gid = parts.fragment[len('gid='):]
     else:
         gid = 0
-    params = parse.urlencode({'headers': headers, 'gid': gid})
+    params = parse.urlencode(OrderedDict([('headers', headers), ('gid', gid)]))
     return parse.urlunparse(
         (parts.scheme, parts.netloc, parts.path, None, params, None))
 
