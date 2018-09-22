@@ -59,7 +59,7 @@ def get_description_from_payload(payload):
     return [
         (
             col['label'],               # name
-            Type(col['type'].lower()),  # type_code
+            Type[col['type'].upper()],  # type_code
             None,                       # [display_size]
             None,                       # [internal_size]
             None,                       # [precision]

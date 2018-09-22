@@ -24,7 +24,7 @@ REQUIRED = [
     'moz_sql_parser',
 ]
 if sys.version_info < (3, 4):
-    REQUIRED.append('enum')
+    REQUIRED.append('enum34')
 
 sqlalchemy_extras = [
     'sqlalchemy',
@@ -44,8 +44,12 @@ development_extras = [
     'pipreqs',
     'pytest>=2.8',
     'pytest-cov',
+    'requests_mock',
     'twine',
 ]
+if sys.version_info < (3, 3):
+    development_extras.append('mock')
+
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------

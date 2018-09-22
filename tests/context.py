@@ -12,8 +12,10 @@ from gsheetsdb.query import (
     execute,
     get_column_map,
     get_description_from_payload,
+    LEADING,
     run_query,
 )
 from gsheetsdb.translator import extract_column_aliases, translate
+from gsheetsdb.types import Type
 from gsheetsdb.utils import format_gsheet_error, format_moz_error
 from gsheetsdb.url import extract_url, get_url
