@@ -113,10 +113,10 @@ class GSheetsDialect(default.DefaultDialect):
         if self.url is None:
             return []
 
-        query = 'SELECT C FROM "{catalog}"'.format(catalog=self.url)
+        query = 'SELECT C, COUNT(C) FROM "{catalog}" GROUP BY C'.format(
+            catalog=self.url)
         result = connection.execute(query)
-        # use `set`, since the API has no `SELECT DISTINCT`
-        return list({row[0] for row in result.fetchall()})
+        return [row[0] for row in result.fetchall()]
 
     def has_table(self, connection, table_name, schema=None):
         if self.url is None:
