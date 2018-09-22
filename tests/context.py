@@ -15,6 +15,7 @@ from gsheetsdb.db import (
     connect,
     check_result,
 )
+from gsheetsdb.dialect import add_headers, GSheetsDialect
 from gsheetsdb.processors import CountStar, is_subset, Processor, SubsetMatcher
 from gsheetsdb.query import (
     execute,
