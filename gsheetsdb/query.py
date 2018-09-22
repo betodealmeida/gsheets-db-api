@@ -100,14 +100,13 @@ def execute(query, headers=0):
 
     # run query
     payload = run_query(baseurl, translated_query)
+    if payload['status'] == 'error':
+        raise ProgrammingError(
+            format_gsheet_error(query, translated_query, payload['errors']))
 
     # postprocess
     for processor in used_processors:
         payload = processor.post_process(payload, processed_aliases)
-
-    if payload['status'] == 'error':
-        raise ProgrammingError(
-            format_gsheet_error(query, translated_query, payload['errors']))
 
     # add aliases back
     cols = payload['table']['cols']

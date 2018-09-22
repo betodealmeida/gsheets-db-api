@@ -244,3 +244,42 @@ class QueryTestSuite(unittest.TestCase):
             description,
             [('total', Type.NUMBER, None, None, None, None, True)],
         )
+
+    def test_execute_bad_query(self):
+        with self.assertRaises(exceptions.ProgrammingError):
+            execute('SELECT ((( FROM table')
+
+    @requests_mock.Mocker()
+    def test_execute_gsheets_error(self, m):
+        header_payload = {
+            'table': {
+                'cols': [
+                    {'id': 'A', 'label': 'country', 'type': 'string'},
+                    {
+                        'id': 'B',
+                        'label': 'cnt',
+                        'type': 'number',
+                        'pattern': 'General',
+                    },
+                ],
+            },
+        }
+        m.get(
+            'http://example.com/gviz/tq?headers=1&gid=0&'
+            'tq=SELECT%20%2A%20LIMIT%200',
+            json=header_payload,
+        )
+        query_payload = {
+            'status': 'error',
+            'errors': [{'detailed_message': 'Error!'}],
+        }
+        m.get(
+            'http://example.com/gviz/tq?headers=1&gid=0&'
+            'tq=SELECT%20COUNT(A)%2C%20COUNT(B)',
+            json=query_payload,
+        )
+
+        query = 'SELECT COUNT(*) AS total FROM "http://example.com/"'
+        headers = 1
+        with self.assertRaises(exceptions.ProgrammingError):
+            execute(query, headers)
