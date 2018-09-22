@@ -84,9 +84,10 @@ class Connection(object):
         return cursor.execute(operation, parameters, headers)
 
     def __enter__(self):
-        return self.cursor()
+        return self
 
     def __exit__(self, *exc):
+        self.commit()  # no-op
         self.close()
 
 
@@ -152,7 +153,9 @@ class Cursor(object):
         no more rows are available.
         """
         size = size or self.arraysize
-        return list(itertools.islice(self, size))
+        out = self._results[:size]
+        self._results = self._results[size:]
+        return out
 
     @check_result
     @check_closed
@@ -162,7 +165,9 @@ class Cursor(object):
         sequence of sequences (e.g. a list of tuples). Note that the cursor's
         arraysize attribute can affect the performance of this operation.
         """
-        return list(self)
+        out = self._results[:]
+        self._results = []
+        return out
 
     @check_closed
     def setinputsizes(self, sizes):
@@ -191,9 +196,9 @@ def escape(value):
         return value
     elif isinstance(value, string_types):
         return "'{}'".format(value.replace("'", "''"))
-    elif isinstance(value, (int, float)):
-        return value
     elif isinstance(value, bool):
         return 'TRUE' if value else 'FALSE'
+    elif isinstance(value, (int, float)):
+        return str(value)
     elif isinstance(value, (list, tuple)):
-        return ', '.join(escape(element) for element in value)
+        return '({0})'.format(', '.join(escape(element) for element in value))

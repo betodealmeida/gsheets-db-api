@@ -7,6 +7,13 @@ sys.path.insert(0, os.path.abspath(
 import gsheetsdb
 from gsheetsdb import exceptions
 from gsheetsdb.convert import convert_rows
+from gsheetsdb.db import (
+    apply_parameters,
+    Connection,
+    check_closed,
+    connect,
+    check_result,
+)
 from gsheetsdb.processors import CountStar, is_subset, Processor, SubsetMatcher
 from gsheetsdb.query import (
     execute,
