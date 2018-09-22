@@ -3,7 +3,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from collections import OrderedDict
 import json
+
 from moz_sql_parser import parse as parse_sql
 import pyparsing
 import requests
@@ -25,7 +27,8 @@ LEADING = ")]}'\n"
 def get_column_map(url):
     query = 'SELECT * LIMIT 0'
     result = run_query(url, query)
-    return {col['label']: col['id'] for col in result['table']['cols']}
+    return OrderedDict(
+        sorted((col['label'], col['id']) for col in result['table']['cols']))
 
 
 def run_query(baseurl, query):

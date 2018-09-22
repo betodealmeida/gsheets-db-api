@@ -231,7 +231,7 @@ class QueryTestSuite(unittest.TestCase):
         }
         m.get(
             'http://example.com/gviz/tq?headers=1&gid=0&'
-            'tq=SELECT%20COUNT(A)%2C%20COUNT(B)',
+            'tq=SELECT%20COUNT(B)%2C%20COUNT(A)',
             json=query_payload,
         )
 
@@ -247,7 +247,7 @@ class QueryTestSuite(unittest.TestCase):
 
     def test_execute_bad_query(self):
         with self.assertRaises(exceptions.ProgrammingError):
-            execute('SELECT ((( FROM table')
+            execute('SELECT ORDER BY FROM table')
 
     @requests_mock.Mocker()
     def test_execute_gsheets_error(self, m):
@@ -275,7 +275,7 @@ class QueryTestSuite(unittest.TestCase):
         }
         m.get(
             'http://example.com/gviz/tq?headers=1&gid=0&'
-            'tq=SELECT%20COUNT(A)%2C%20COUNT(B)',
+            'tq=SELECT%20COUNT(B)%2C%20COUNT(A)',
             json=query_payload,
         )
 
