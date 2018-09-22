@@ -65,7 +65,7 @@ class GSheetsCompiler(compiler.SQLCompiler):
     def visit_column(self, column, **kwargs):
         if column.table is not None:
             column.table.named_with_column = False
-        return super().visit_column(column, **kwargs)
+        return super(GSheetsCompiler, self).visit_column(column, **kwargs)
 
 
 class GSheetsTypeCompiler(compiler.GenericTypeCompiler):

@@ -3,6 +3,9 @@
 from mock import Mock
 import unittest
 
+import requests_mock
+from sqlalchemy import MetaData, select, Table
+from sqlalchemy.engine import create_engine
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.sql import sqltypes
 
@@ -273,3 +276,32 @@ class DialectTestSuite(unittest.TestCase):
         dialect = GSheetsDialect()
         result = dialect._check_unicode_description(connection)
         self.assertTrue(result)
+
+    @requests_mock.Mocker()
+    def test_GSheetsCompiler(self, m):
+        header_payload = {
+            'status': 'ok',
+            'table': {
+                'cols': [
+                    {'id': 'A', 'label': 'country', 'type': 'string'},
+                    {
+                        'id': 'B',
+                        'label': 'cnt',
+                        'type': 'number',
+                        'pattern': 'General',
+                    },
+                ],
+                'rows': [],
+            },
+        }
+        m.get(
+            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
+            json=header_payload,
+        )
+        engine = create_engine('gsheets://')
+        table = Table(
+            'http://example.com/', MetaData(bind=engine), autoload=True)
+        query = select([table.columns.country], from_obj=table)
+        result = str(query)
+        expected = 'SELECT country \nFROM "http://example.com/"'
+        self.assertEqual(result, expected)
