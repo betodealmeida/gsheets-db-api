@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from mock import Mock
 import unittest
 
 from sqlalchemy.engine.url import make_url
+from sqlalchemy.sql import sqltypes
 
-from .context import add_headers, connect, gsheetsdb, GSheetsDialect
+from .context import add_headers, connect, gsheetsdb, GSheetsDialect, Type
 
 
 class DialectTestSuite(unittest.TestCase):
@@ -40,6 +42,21 @@ class DialectTestSuite(unittest.TestCase):
         self.assertEqual(
             dialect.url, '{0}://example.com/'.format(dialect.scheme))
 
+    def test_get_schema_names(self):
+        connection = Mock()
+        connection.execute = Mock()
+        result = Mock()
+        result.fetchall = Mock()
+        result.fetchall.return_value = [('default', 2), ('public', 4)]
+        connection.execute.return_value = result
+
+        dialect = GSheetsDialect()
+        url = make_url('gsheets://example.com/')
+        dialect.create_connect_args(url)
+        result = dialect.get_schema_names(connection)
+        expected = ['default', 'public']
+        self.assertEqual(result, expected)
+
     def test_get_schema_names_no_catalog(self):
         connection = connect()
         dialect = GSheetsDialect()
@@ -47,6 +64,126 @@ class DialectTestSuite(unittest.TestCase):
         dialect.create_connect_args(url)
         result = dialect.get_schema_names(connection)
         expected = []
+        self.assertEqual(result, expected)
+
+    def test_get_table_names(self):
+        connection = Mock()
+        connection.execute = Mock()
+        result = Mock()
+        result.fetchall = Mock()
+        result.fetchall.return_value = [
+            ('http://example.com/edit#gid=0', 2),
+            ('http://example.com/edit#gid=1', 1),
+        ]
+        connection.execute.return_value = result
+
+        dialect = GSheetsDialect()
+        url = make_url('gsheets://example.com/')
+        dialect.create_connect_args(url)
+        result = dialect.get_table_names(connection)
+        expected = [
+            'http://example.com/edit?headers=2&gid=0',
+            'http://example.com/edit?headers=1&gid=1',
+        ]
+        self.assertEqual(result, expected)
+
+    def test_get_table_names_no_catalog(self):
+        connection = connect()
+        dialect = GSheetsDialect()
+        url = make_url('gsheets://')
+        dialect.create_connect_args(url)
+        result = dialect.get_table_names(connection)
+        expected = []
+        self.assertEqual(result, expected)
+
+    def test_has_table(self):
+        connection = Mock()
+        connection.execute = Mock()
+        result = Mock()
+        result.fetchall = Mock()
+        result.fetchall.return_value = [
+            ('http://example.com/edit#gid=0', 2),
+            ('http://example.com/edit#gid=1', 1),
+        ]
+        connection.execute.return_value = result
+
+        dialect = GSheetsDialect()
+        url = make_url('gsheets://example.com/')
+        dialect.create_connect_args(url)
+
+        self.assertTrue(
+            dialect.has_table(
+                connection, 'http://example.com/edit?headers=2&gid=0'))
+        self.assertFalse(
+            dialect.has_table(
+                connection, 'http://example.com/edit?headers=2&gid=1'))
+
+    def test_has_table_no_catalog(self):
+        connection = connect()
+        dialect = GSheetsDialect()
+        url = make_url('gsheets://')
+        dialect.create_connect_args(url)
+        self.assertTrue(dialect.has_table(connection, 'ANY TABLE'))
+
+    def test_get_columns(self):
+        description = [
+            ('datetime', Type.DATETIME, None, None, None, None, True),
+            ('number', Type.NUMBER, None, None, None, None, True),
+            ('boolean', Type.BOOLEAN, None, None, None, None, True),
+            ('date', Type.DATE, None, None, None, None, True),
+            ('timeofday', Type.TIMEOFDAY, None, None, None, None, True),
+            ('string', Type.STRING, None, None, None, None, True),
+        ]
+        connection = Mock()
+        connection.execute = Mock()
+        result = Mock()
+        result._cursor_description = Mock()
+        result._cursor_description.return_value = description
+        connection.execute.return_value = result
+
+        dialect = GSheetsDialect()
+        url = make_url('gsheets://example.com/')
+        dialect.create_connect_args(url)
+
+        result = dialect.get_columns(connection, 'SOME TABLE')
+        expected = [
+            {
+                'name': 'datetime',
+                'type': sqltypes.DATETIME,
+                'nullable': True,
+                'default': None,
+            },
+            {
+                'name': 'number',
+                'type': sqltypes.Numeric,
+                'nullable': True,
+                'default': None,
+            },
+            {
+                'name': 'boolean',
+                'type': sqltypes.Boolean,
+                'nullable': True,
+                'default': None,
+            },
+            {
+                'name': 'date',
+                'type': sqltypes.DATE,
+                'nullable': True,
+                'default': None,
+            },
+            {
+                'name': 'timeofday',
+                'type': sqltypes.TIME,
+                'nullable': True,
+                'default': None,
+            },
+            {
+                'name': 'string',
+                'type': sqltypes.String,
+                'nullable': True,
+                'default': None,
+            },
+        ]
         self.assertEqual(result, expected)
 
     def test_get_view_names(self):
