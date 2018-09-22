@@ -3,6 +3,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from collections import OrderedDict
+
 from moz_sql_parser import parse as parse_sql
 from six.moves.urllib import parse
 
@@ -26,7 +28,7 @@ def get_url(url, headers=0, gid=0, sheet=None):
     if parts.fragment.startswith('gid='):
         gid = parts.fragment[len('gid='):]
 
-    args = {}
+    args = OrderedDict()
     if headers > 0:
         args['headers'] = headers
     if sheet is not None:
