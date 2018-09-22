@@ -11,17 +11,21 @@ from .context import console, exceptions
 
 class ConsoleTestSuite(unittest.TestCase):
 
+    @patch('gsheetsdb.console.docopt')
     @patch('sys.stdout', new_callable=StringIO)
     @patch('gsheetsdb.console.prompt')
-    def test_main(self, prompt, stdout):
+    def test_main(self, prompt, stdout, docopt):
+        docopt.return_value = {'--headers': '0', '--raise': False}
         prompt.side_effect = EOFError()
         console.main()
         self.assertEqual(stdout.getvalue(), 'GoodBye!\n')
 
+    @patch('gsheetsdb.console.docopt')
     @requests_mock.Mocker()
     @patch('sys.stdout', new_callable=StringIO)
     @patch('gsheetsdb.console.prompt')
-    def test_main_query(self, m, prompt, stdout):
+    def test_main_query(self, m, prompt, stdout, docopt):
+        docopt.return_value = {'--headers': '0', '--raise': False}
         header_payload = {
             'table': {
                 'cols': [
@@ -78,9 +82,11 @@ class ConsoleTestSuite(unittest.TestCase):
         )
         self.assertEqual(result, expected)
 
+    @patch('gsheetsdb.console.docopt')
     @patch('sys.stdout', new_callable=StringIO)
     @patch('gsheetsdb.console.prompt')
-    def test_console_exception(self, prompt, stdout):
+    def test_console_exception(self, prompt, stdout, docopt):
+        docopt.return_value = {'--headers': '0', '--raise': False}
 
         def gen():
             yield 'SELECTSELECTSELECT'
