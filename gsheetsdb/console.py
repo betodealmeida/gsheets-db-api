@@ -98,7 +98,7 @@ def main():
             query = prompt(
                 'sql> ', lexer=lexer, completer=completer,
                 style=style, history=history)
-        except EOFError:
+        except (EOFError, KeyboardInterrupt):
             break  # Control-D pressed.
 
         # run query
