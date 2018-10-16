@@ -96,7 +96,7 @@ def main():
     while True:
         try:
             query = prompt(
-                '> ', lexer=lexer, completer=completer,
+                'sql> ', lexer=lexer, completer=completer,
                 style=style, history=history)
         except EOFError:
             break  # Control-D pressed.
@@ -115,4 +115,4 @@ def main():
             columns = [t[0] for t in cursor.description or []]
             print(tabulate(result, headers=columns))
 
-    print('GoodBye!')
+    print('See ya!')
