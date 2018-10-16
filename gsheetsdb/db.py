@@ -5,8 +5,9 @@ from __future__ import unicode_literals
 
 from six import string_types
 
-from gsheetsdb.exceptions import Error, NotSupportedError
+from gsheetsdb.exceptions import Error, NotSupportedError, ProgrammingError
 from gsheetsdb.query import execute
+from gsheetsdb.sqlite import execute as sqlite_execute
 
 
 def connect():
@@ -122,7 +123,10 @@ class Cursor(object):
     def execute(self, operation, parameters=None, headers=0):
         self.description = None
         query = apply_parameters(operation, parameters or {})
-        self._results, self.description = execute(query, headers)
+        try:
+            self._results, self.description = execute(query, headers)
+        except ProgrammingError:
+            self._results, self.description = sqlite_execute(query, headers)
         return self
 
     @check_closed

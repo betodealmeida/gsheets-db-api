@@ -1,13 +1,11 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from __future__ import unicode_literals
 
 import datetime
 import sqlite3
 
 from gsheetsdb.convert import convert_rows
-from gsheetsdb.db import Cursor
 from gsheetsdb.query import get_description_from_payload, run_query
 from gsheetsdb.url import extract_url, get_url
 
@@ -79,9 +77,7 @@ def execute(query, headers=0):
     # run query in SQLite instead
     results = conn.execute(query).fetchall()
 
-    # wrap it in cursor
-    cursor = Cursor()
-    cursor._results = results
-    cursor.description = get_description_from_payload(payload)
+    # get description from payload
+    description = get_description_from_payload(payload)
 
-    return cursor
+    return results, description
