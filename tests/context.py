@@ -16,7 +16,14 @@ from gsheetsdb.db import (
     check_result,
 )
 from gsheetsdb.dialect import add_headers, GSheetsDialect
-from gsheetsdb.processors import CountStar, is_subset, Processor, SubsetMatcher
+from gsheetsdb.processors import (
+    Any,
+    CountStar,
+    DateTrunc,
+    is_subset,
+    Processor,
+    SubsetMatcher,
+)
 from gsheetsdb.query import (
     execute,
     get_column_map,

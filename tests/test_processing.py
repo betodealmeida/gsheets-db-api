@@ -6,7 +6,14 @@ import warnings
 
 from moz_sql_parser import parse
 
-from .context import CountStar, is_subset, Processor, SubsetMatcher
+from .context import (
+    Any,
+    CountStar,
+    DateTrunc,
+    is_subset,
+    Processor,
+    SubsetMatcher,
+)
 
 
 class ProcessingTestSuite(unittest.TestCase):
@@ -215,3 +222,17 @@ class ProcessingTestSuite(unittest.TestCase):
 
         other = [1, 3, 4]
         self.assertFalse(is_subset(json, other))
+
+    def test_any_match(self):
+        pattern = SubsetMatcher({'name': Any()})
+        self.assertTrue(pattern.match({'name': 'Alice'}))
+        self.assertTrue(pattern.match({'name': 'Bob'}))
+
+    def test_datetrunc_match(self):
+        self.assertTrue(DateTrunc.match(
+            {'select': {'value': {'datetrunc': [{'literal': 'month'}, 'datetime']}}}))
+        self.assertFalse(DateTrunc.match(
+            {'select': {'value': {'datetrunc': [{'literal': 'week'}, 'datetime']}}}))
+        self.assertFalse(DateTrunc.match({'select': {'value': 'datetime'}}))
+        self.assertFalse(DateTrunc.match({'select': {'value': {'year': 'datetime'}}}))
+        self.assertFalse(DateTrunc.match({'select': {'value': {'month': 'datetime'}}}))
