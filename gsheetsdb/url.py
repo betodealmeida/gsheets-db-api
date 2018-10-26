@@ -6,7 +6,12 @@ from __future__ import unicode_literals
 from collections import OrderedDict
 
 from moz_sql_parser import parse as parse_sql
+import pyparsing
+import re
 from six.moves.urllib import parse
+
+
+FROM_REGEX = re.compile(' from ("http.*?")', re.IGNORECASE)
 
 
 def get_url(url, headers=0, gid=0, sheet=None):
@@ -42,5 +47,8 @@ def get_url(url, headers=0, gid=0, sheet=None):
 
 
 def extract_url(sql):
-    parsed_query = parse_sql(sql)
-    return parsed_query['from']
+    try:
+        return parse_sql(sql)['from']
+    except pyparsing.ParseException as e:
+        # fallback to regex to extract from
+        return FROM_REGEX.search(sql).group(1).strip('"')
