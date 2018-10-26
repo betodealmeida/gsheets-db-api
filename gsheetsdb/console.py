@@ -102,7 +102,7 @@ def main():
             break  # Control-D pressed.
 
         # run query
-        query = query.strip('; ')
+        query = query.strip('; ').replace('%', '%%')
         if query:
             try:
                 result = cursor.execute(query, headers=headers)

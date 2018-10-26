@@ -3,7 +3,10 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from moz_sql_parser import format
+try:
+    from moz_sql_parser import format
+except ImportError:
+    from gsheetsdb.formatting import format
 from six import string_types
 
 from gsheetsdb.exceptions import NotSupportedError
