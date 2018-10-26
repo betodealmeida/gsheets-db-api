@@ -44,7 +44,6 @@ Row(country='IN', sum_cnt=5.0)
 ## Installation ##
 
 ```bash
-$ pip install git+https://github.com/betodealmeida/moz-sql-parser.git@improvements_sql_formatter
 $ pip install gsheetsdb
 $ pip install gsheetsdb[cli]         # if you want to use the CLI
 $ pip install gsheetsdb[sqlalchemy]  # if you want to use it with SQLAlchemy
