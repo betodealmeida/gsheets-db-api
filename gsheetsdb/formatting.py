@@ -110,7 +110,7 @@ class Formatter:
                 return self.op(json)
         if isinstance(json, string_types):
             return escape(json, self.ansi_quotes, self.should_quote)
-        
+
         return text_type(json)
 
     def delimited_list(self, json):
