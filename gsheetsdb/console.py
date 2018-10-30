@@ -88,14 +88,11 @@ def main():
 
     arguments = docopt(__doc__, version=__version__.__version__)
 
-    service_account_info = None
-    if arguments['--service-account-file']:
-        with open(arguments['--service-account-file']) as fp:
-            service_account_info = json.load(fp)
-        if arguments['--subject']:
-            service_account_info['subject'] = arguments['--subject']
-
-    connection = connect(service_account_info=service_account_info)
+    auth = {
+        'service_account_file': arguments['--service-account-file'],
+        'subject': arguments['--subject'],
+    }
+    connection = connect(auth)
     headers = int(arguments['--headers'])
     cursor = connection.cursor()
 

@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import json
 
+from google.oauth2 import service_account
 from six import string_types
 
 from gsheetsdb.exceptions import Error, NotSupportedError, ProgrammingError
@@ -12,7 +13,12 @@ from gsheetsdb.query import execute
 from gsheetsdb.sqlite import execute as sqlite_execute
 
 
-def connect(service_account_file=None, service_account_info=None):
+# Google API scopes for authentication
+# https://developers.google.com/chart/interactive/docs/spreadsheets
+SCOPES = ['https://spreadsheets.google.com/feeds']
+
+
+def connect(auth=None):
     """
     Constructor for creating a connection to the database.
 
@@ -20,11 +26,26 @@ def connect(service_account_file=None, service_account_info=None):
         >>> curs = conn.cursor()
 
     """
+    credentials = get_credentials_from_auth(**auth)
+    return Connection(credentials)
+
+
+def get_credentials_from_auth(
+    service_account_file=None,
+    service_account_info=None,
+    subject=None,
+):
     if service_account_file:
         with open(service_account_file) as fp:
             service_account_info = json.load(fp)
 
-    return Connection(service_account_info)
+    if not service_account_info:
+        return None
+
+    credentials = service_account.Credentials.from_service_account_info(
+        service_account_info, scopes=SCOPES, subject=subject)
+
+    return credentials
 
 
 def check_closed(f):
@@ -52,8 +73,8 @@ class Connection(object):
 
     """Connection to a Google Spreadsheet."""
 
-    def __init__(self, service_account_info=None):
-        self.service_account_info = service_account_info
+    def __init__(self, auth=None):
+        self.auth = auth
 
         self.closed = False
         self.cursors = []
@@ -80,7 +101,7 @@ class Connection(object):
     @check_closed
     def cursor(self):
         """Return a new Cursor Object using the connection."""
-        cursor = Cursor(self.service_account_info)
+        cursor = Cursor(self.auth)
         self.cursors.append(cursor)
 
         return cursor
@@ -102,8 +123,8 @@ class Cursor(object):
 
     """Connection cursor."""
 
-    def __init__(self, service_account_info=None):
-        self.service_account_info = service_account_info
+    def __init__(self, auth=None):
+        self.auth = auth
 
         # This read/write attribute specifies the number of rows to fetch at a
         # time with .fetchmany(). It defaults to 1 meaning to fetch a single
@@ -135,10 +156,10 @@ class Cursor(object):
         query = apply_parameters(operation, parameters or {})
         try:
             self._results, self.description = execute(
-                query, headers, self.service_account_info)
+                query, headers, self.auth)
         except ProgrammingError:
             self._results, self.description = sqlite_execute(
-                query, headers, self.service_account_info)
+                query, headers, self.auth)
         return self
 
     @check_closed

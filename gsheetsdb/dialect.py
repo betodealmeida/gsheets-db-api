@@ -103,13 +103,11 @@ class GSheetsDialect(default.DefaultDialect):
         **kwargs
     ):
         super(GSheetsDialect, self).__init__(*args, **kwargs)
-
-        if service_account_file:
-            with open(service_account_file) as fp:
-                service_account_info = json.load(fp)
-        if service_account_info and subject:
-            service_account_info['subject'] = subject
-        self.service_account_info = service_account_info
+        self.auth = {
+            'service_account_file': service_account_file,
+            'service_account_info': service_account_info,
+            'subject': subject,
+        }
 
     @classmethod
     def dbapi(cls):
@@ -126,7 +124,7 @@ class GSheetsDialect(default.DefaultDialect):
                 port=port,
                 database=url.database or '',
             )
-        return ([], {'service_account_info': self.service_account_info})
+        return ([self.auth], {})
 
     def get_schema_names(self, connection, **kwargs):
         if self.url is None:

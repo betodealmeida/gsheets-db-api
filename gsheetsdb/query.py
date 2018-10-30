@@ -7,7 +7,6 @@ from collections import OrderedDict
 import json
 
 from google.auth.transport.requests import AuthorizedSession
-from google.oauth2 import service_account
 from moz_sql_parser import parse as parse_sql
 import pyparsing
 from requests import Session
@@ -25,27 +24,20 @@ from gsheetsdb.utils import format_gsheet_error, format_moz_error
 # the JSON payload has this in the beginning
 LEADING = ")]}'\n"
 
-# Google API scopes for authentication
-# https://developers.google.com/chart/interactive/docs/spreadsheets
-SCOPES = ['https://spreadsheets.google.com/feeds']
 
-
-def get_column_map(url, service_account_info):
+def get_column_map(url, credentials=None):
     query = 'SELECT * LIMIT 0'
-    result = run_query(url, query, service_account_info)
+    result = run_query(url, query, credentials)
     return OrderedDict(
         sorted((col['label'], col['id']) for col in result['table']['cols']))
 
 
-def run_query(baseurl, query, service_account_info):
+def run_query(baseurl, query, credentials=None):
     url = '{baseurl}&tq={query}'.format(
         baseurl=baseurl, query=parse.quote(query, safe='/()'))
     headers = {'X-DataSource-Auth': 'true'}
 
-    if service_account_info:
-        subject = service_account_info.get('subject')
-        credentials = service_account.Credentials.from_service_account_info(
-            service_account_info, scopes=SCOPES, subject=subject)
+    if credentials:
         session = AuthorizedSession(credentials)
     else:
         session = requests.Session()
@@ -88,7 +80,7 @@ def get_description_from_payload(payload):
     ]
 
 
-def execute(query, headers=0, service_account_info=None):
+def execute(query, headers=0, credentials=None):
     try:
         parsed_query = parse_sql(query)
     except pyparsing.ParseException as e:
@@ -102,7 +94,7 @@ def execute(query, headers=0, service_account_info=None):
     baseurl = get_url(from_, headers)
 
     # map between labels and ids, eg, `{ 'country': 'A' }`
-    column_map = get_column_map(baseurl, service_account_info)
+    column_map = get_column_map(baseurl, credentials)
 
     # preprocess
     used_processors = []
@@ -117,7 +109,7 @@ def execute(query, headers=0, service_account_info=None):
     translated_query = translate(parsed_query, column_map)
 
     # run query
-    payload = run_query(baseurl, translated_query, service_account_info)
+    payload = run_query(baseurl, translated_query, credentials)
     if payload['status'] == 'error':
         raise ProgrammingError(
             format_gsheet_error(query, translated_query, payload['errors']))
