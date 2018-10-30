@@ -4,6 +4,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import OrderedDict
+import json
 
 from six.moves.urllib import parse
 from sqlalchemy.engine import default
@@ -93,6 +94,23 @@ class GSheetsDialect(default.DefaultDialect):
     description_encoding = None
     supports_native_boolean = True
 
+    def __init__(
+        self,
+        service_account_file=None,
+        service_account_info=None,
+        subject=None,
+        *args,
+        **kwargs
+    ):
+        super(GSheetsDialect, self).__init__(*args, **kwargs)
+
+        if service_account_file:
+            with open(service_account_file) as fp:
+                service_account_info = json.load(fp)
+        if service_account_info and subject:
+            service_account_info['subject'] = subject
+        self.service_account_info = service_account_info
+
     @classmethod
     def dbapi(cls):
         return gsheetsdb
@@ -108,7 +126,7 @@ class GSheetsDialect(default.DefaultDialect):
                 port=port,
                 database=url.database or '',
             )
-        return ([], {})
+        return ([], {'service_account_info': self.service_account_info})
 
     def get_schema_names(self, connection, **kwargs):
         if self.url is None:
