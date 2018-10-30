@@ -3,6 +3,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import json
+
 from six import string_types
 
 from gsheetsdb.exceptions import Error, NotSupportedError, ProgrammingError
@@ -10,7 +12,7 @@ from gsheetsdb.query import execute
 from gsheetsdb.sqlite import execute as sqlite_execute
 
 
-def connect():
+def connect(service_account_file=None, service_account_info=None):
     """
     Constructor for creating a connection to the database.
 
@@ -18,7 +20,11 @@ def connect():
         >>> curs = conn.cursor()
 
     """
-    return Connection()
+    if service_account_file:
+        with open(service_account_file) as fp:
+            service_account_info = json.load(fp)
+
+    return Connection(service_account_info)
 
 
 def check_closed(f):
@@ -46,7 +52,9 @@ class Connection(object):
 
     """Connection to a Google Spreadsheet."""
 
-    def __init__(self):
+    def __init__(self, service_account_info=None):
+        self.service_account_info = service_account_info
+
         self.closed = False
         self.cursors = []
 
@@ -72,7 +80,7 @@ class Connection(object):
     @check_closed
     def cursor(self):
         """Return a new Cursor Object using the connection."""
-        cursor = Cursor()
+        cursor = Cursor(self.service_account_info)
         self.cursors.append(cursor)
 
         return cursor
@@ -94,7 +102,9 @@ class Cursor(object):
 
     """Connection cursor."""
 
-    def __init__(self):
+    def __init__(self, service_account_info=None):
+        self.service_account_info = service_account_info
+
         # This read/write attribute specifies the number of rows to fetch at a
         # time with .fetchmany(). It defaults to 1 meaning to fetch a single
         # row at a time.
@@ -124,9 +134,11 @@ class Cursor(object):
         self.description = None
         query = apply_parameters(operation, parameters or {})
         try:
-            self._results, self.description = execute(query, headers)
+            self._results, self.description = execute(
+                query, headers, self.service_account_info)
         except ProgrammingError:
-            self._results, self.description = sqlite_execute(query, headers)
+            self._results, self.description = sqlite_execute(
+                query, headers, self.service_account_info)
         return self
 
     @check_closed

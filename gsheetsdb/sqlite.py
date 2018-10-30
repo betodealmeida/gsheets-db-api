@@ -61,11 +61,11 @@ def insert_into(cursor, table, payload):
     cursor.executemany(query, rows)
 
 
-def execute(query, headers=0):
+def execute(query, headers=0, service_account_info=None):
     # fetch all the data
     from_ = extract_url(query)
     baseurl = get_url(from_, headers)
-    payload = run_query(baseurl, 'SELECT *')
+    payload = run_query(baseurl, 'SELECT *', service_account_info)
 
     # create table
     conn = sqlite3.connect(':memory:', detect_types=sqlite3.PARSE_DECLTYPES)

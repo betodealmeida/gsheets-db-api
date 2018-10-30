@@ -19,9 +19,10 @@ AUTHOR = 'Beto Dealmeida'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
+    'google-auth',
+    'moz_sql_parser',
     'requests',
     'six',
-    'moz_sql_parser',
 ]
 if sys.version_info < (3, 4):
     REQUIRED.append('enum34')

@@ -1,19 +1,22 @@
 """Google Spreadsheets CLI
 
 Usage:
-  gsheetsdb [--headers=<headers>] [--raise]
+  gsheetsdb [--headers=<headers>] [--raise] [--service-account-file=<file> [--subject=<subject>]]
   gsheetsdb (-h | --help)
   gsheetsdb --version
 
 Options:
-  -h --help             Show this screen.
-  --version             Show version.
-  --headers=<headers>   Specifies how many rows are header rows [default: 0]
+  -h --help                         Show this screen.
+  --version                         Show version.
+  --headers=<headers>               How many rows are headers [default: 0]
+  --service-account-file=<file>     Service account file for authentication
+  --subject=<subject>               Subject to impersonate
 
 """
 
 from __future__ import unicode_literals
 
+import json
 import os
 
 from docopt import docopt
@@ -84,7 +87,15 @@ def main():
     history = FileHistory(os.path.expanduser('~/.gsheetsdb_history'))
 
     arguments = docopt(__doc__, version=__version__.__version__)
-    connection = connect()
+
+    service_account_info = None
+    if arguments['--service-account-file']:
+        with open(arguments['--service-account-file']) as fp:
+            service_account_info = json.load(fp)
+        if arguments['--subject']:
+            service_account_info['subject'] = arguments['--subject']
+
+    connection = connect(service_account_info=service_account_info)
     headers = int(arguments['--headers'])
     cursor = connection.cursor()
 
