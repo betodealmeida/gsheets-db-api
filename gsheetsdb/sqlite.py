@@ -75,9 +75,7 @@ def execute(query, headers=0, credentials=None):
     conn.commit()
 
     # run query in SQLite instead
-    results = conn.execute(query).fetchall()
-
-    # get description from payload
-    description = get_description_from_payload(payload)
+    results = cursor.execute(query).fetchall()
+    description = cursor.description
 
     return results, description
