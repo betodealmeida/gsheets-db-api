@@ -98,3 +98,18 @@ Alternatively, you can initialize the engine with a "catalog". The catalog is a 
 | 2 | https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/edit#gid=1077884006 | 2 | default |
 
 This will make the two spreadsheets above available as "tables" in the `default` schema.
+
+
+## Authentication ##
+
+You can access spreadsheets that are shared only within an organization. In order to do this, first [create a service account](https://developers.google.com/api-client-library/python/auth/service-accounts#creatinganaccount). Make sure you select "Enable G Suite Domain-wide Delegation". Download the key as a JSON file.
+
+Next, you need to manage API client access at https://admin.google.com/${DOMAIN}/AdminHome?chromeless=1#OGX:ManageOauthClients. Add the "Unique ID" from the previous step as the "Client Name", and add `https://spreadsheets.google.com/feeds` as the scope.
+
+Now, when creating the connection from the DB API or from SQLAlchemy you can point to the JSON file and the user you want to impersonate:
+
+```python
+>>> auth = {'service_account_file': '/path/to/certificate.json',' subject': 'user@domain.com'}
+>>> conn = connect(auth)
+```
+

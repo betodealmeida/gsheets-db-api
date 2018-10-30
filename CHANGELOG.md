@@ -22,3 +22,7 @@
 - `COUNT(*)` working.
 - Fallback to SQLite if query fails.
 - Custom date truncation using `DATETRUNC`.
+
+## [0.1.6] - 2018-10-30
+- Handle authentication.
+- Fix cursor description in SQLite fallback.
