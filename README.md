@@ -109,7 +109,7 @@ Next, you need to manage API client access at https://admin.google.com/${DOMAIN}
 Now, when creating the connection from the DB API or from SQLAlchemy you can point to the JSON file and the user you want to impersonate:
 
 ```python
->>> auth = {'service_account_file': '/path/to/certificate.json',' subject': 'user@domain.com'}
+>>> auth = {'service_account_file': '/path/to/certificate.json', 'subject': 'user@domain.com'}
 >>> conn = connect(auth)
 ```
 
