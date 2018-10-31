@@ -41,6 +41,36 @@ Row(country='BR', sum_cnt=4.0)
 Row(country='IN', sum_cnt=5.0)
 ```
 
+## How it works ##
+
+### Transpiling ###
+
+Google spreadsheets can actually be queried with a [very limited SQL API](https://developers.google.com/chart/interactive/docs/querylanguage). This module will transpile the SQL query into a simpler query that the API understands. Eg, the query above would be translated to:
+
+```sql
+SELECT A, SUM(B) GROUP BY A
+```
+
+### Processors ###
+
+In addition to transpiling, this module also provides pre- and post-processors. The pre-processors add more columns to the query, and the post-processors build the actual result from those extra columns. Eg, `COUNT(*)` is not supported, so the following query:
+
+```sql
+SELECT COUNT(*) FROM "https://docs.google.com/spreadsheets/d/1_rN3lm0R_bU3NemO0s9pbFkY5LQPcuy1pscv8ZXPtg8/"
+```
+
+Gets translated to:
+
+```sql
+SELECT COUNT(A), COUNT(B)
+```
+
+And then the maximum count is returned. This assumes that at least one column has no `NULL`s.
+
+
+### SQLite ###
+When a query can't be expressed, the module will issue a `SELECT *`, load the data into an in-memory SQLite table, and execute the query in SQLite. This is obviously inneficient, since all data has to be downloaded, but ensures that all queries succeed.
+
 ## Installation ##
 
 ```bash
