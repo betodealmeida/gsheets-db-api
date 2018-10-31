@@ -21,7 +21,7 @@ AUTHOR = 'Beto Dealmeida'
 REQUIRED = [
     'google-auth',
     'moz_sql_parser',
-    'requests',
+    'requests>=2.20.0',
     'six',
 ]
 if sys.version_info < (3, 4):
