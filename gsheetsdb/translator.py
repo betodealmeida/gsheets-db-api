@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 try:
     from moz_sql_parser import format
-except ImportError:
+except ImportError:  # pragma: no cover
     from gsheetsdb.formatting import format
 from six import string_types
 

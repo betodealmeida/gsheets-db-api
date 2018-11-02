@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
+
 from collections import namedtuple
 import unittest
 
@@ -49,6 +54,18 @@ class QueryTestSuite(unittest.TestCase):
         baseurl = 'http://example.com/'
         query = 'SELECT *'
         result = run_query(baseurl, query)
+        expected = 'ok'
+        self.assertEqual(result, expected)
+
+    @requests_mock.Mocker()
+    def test_run_query_with_credentials(self, m):
+        m.get('http://example.com/&tq=SELECT%20%2A', json='ok')
+        credentials = Mock()
+        credentials.before_request = Mock()
+
+        baseurl = 'http://example.com/'
+        query = 'SELECT *'
+        result = run_query(baseurl, query, credentials)
         expected = 'ok'
         self.assertEqual(result, expected)
 

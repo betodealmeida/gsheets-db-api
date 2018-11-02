@@ -42,3 +42,14 @@ class UrlTestSuite(unittest.TestCase):
         result = get_url(url, headers=1, gid=10, sheet=None)
         expected = 'http://example.com/gviz/tq?headers=2&sheet=table'
         self.assertEqual(result, expected)
+
+    def test_extract_url_bad_sql(self):
+        query = 'SELECTSELECTSELECT'
+        result = extract_url(query)
+        self.assertIsNone(result)
+
+    def test_extract_url_using_regex(self):
+        query = 'INVALID FROM "http://example.com"'
+        result = extract_url(query)
+        expected = 'http://example.com'
+        self.assertEqual(result, expected)
