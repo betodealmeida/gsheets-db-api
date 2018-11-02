@@ -40,12 +40,12 @@ class DialectTestSuite(unittest.TestCase):
 
         url = make_url('gsheets://')
         args = dialect.create_connect_args(url)
-        self.assertEqual(args, ([], {}))
+        self.assertEqual(args, ([None], {}))
         self.assertIsNone(dialect.url)
 
         url = make_url('gsheets://example.com/')
         args = dialect.create_connect_args(url)
-        self.assertEqual(args, ([], {}))
+        self.assertEqual(args, ([None], {}))
         self.assertEqual(
             dialect.url, '{0}://example.com/'.format(dialect.scheme))
 

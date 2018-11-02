@@ -48,7 +48,6 @@ class ProcessingTestSuite(unittest.TestCase):
                 "http://example.com"
         ''')
         self.assertEqual(result, expected)
-        self.assertEqual(processor.alias, 'total')
 
         payload = {
             'status': 'ok',
@@ -147,7 +146,6 @@ class ProcessingTestSuite(unittest.TestCase):
                 country
         ''')
         self.assertEqual(result, expected)
-        self.assertEqual(processor.alias, 'count star')
 
         payload = {
             'status': 'ok',

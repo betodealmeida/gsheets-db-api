@@ -30,6 +30,7 @@ from pygments.styles import get_style_by_name
 from tabulate import tabulate
 
 from gsheetsdb import connect, __version__
+from gsheetsdb.auth import get_credentials_from_auth
 
 
 keywords = [
@@ -92,7 +93,8 @@ def main():
         'service_account_file': arguments['--service-account-file'],
         'subject': arguments['--subject'],
     }
-    connection = connect(auth)
+    credentials = get_credentials_from_auth(**auth)
+    connection = connect(credentials)
     headers = int(arguments['--headers'])
     cursor = connection.cursor()
 

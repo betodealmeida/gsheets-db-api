@@ -6,6 +6,7 @@ import datetime
 import sqlite3
 
 from gsheetsdb.convert import convert_rows
+from gsheetsdb.exceptions import ProgrammingError
 from gsheetsdb.query import get_description_from_payload, run_query
 from gsheetsdb.url import extract_url, get_url
 
@@ -64,6 +65,8 @@ def insert_into(cursor, table, payload):
 def execute(query, headers=0, credentials=None):
     # fetch all the data
     from_ = extract_url(query)
+    if not from_:
+        raise ProgrammingError('Invalid query: {query}'.format(query=query))
     baseurl = get_url(from_, headers)
     payload = run_query(baseurl, 'SELECT *', credentials)
 

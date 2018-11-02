@@ -19,17 +19,27 @@ class ConsoleTestSuite(unittest.TestCase):
     @patch('sys.stdout', new_callable=StringIO)
     @patch('gsheetsdb.console.prompt')
     def test_main(self, prompt, stdout, docopt):
-        docopt.return_value = {'--headers': '0', '--raise': False}
+        docopt.return_value = {
+            '--headers': '0',
+            '--raise': False,
+            '--service-account-file': None,
+            '--subject': None,
+        }
         prompt.side_effect = EOFError()
         console.main()
-        self.assertEqual(stdout.getvalue(), 'GoodBye!\n')
+        self.assertEqual(stdout.getvalue(), 'See ya!\n')
 
     @patch('gsheetsdb.console.docopt')
     @requests_mock.Mocker()
     @patch('sys.stdout', new_callable=StringIO)
     @patch('gsheetsdb.console.prompt')
     def test_main_query(self, m, prompt, stdout, docopt):
-        docopt.return_value = {'--headers': '0', '--raise': False}
+        docopt.return_value = {
+            '--headers': '0',
+            '--raise': False,
+            '--service-account-file': None,
+            '--subject': None,
+        }
         header_payload = {
             'table': {
                 'cols': [
@@ -82,7 +92,7 @@ class ConsoleTestSuite(unittest.TestCase):
             '---------  -----\n'
             'BR             1\n'
             'IN             2\n'
-            'GoodBye!\n'
+            'See ya!\n'
         )
         self.assertEqual(result, expected)
 
@@ -90,7 +100,12 @@ class ConsoleTestSuite(unittest.TestCase):
     @patch('sys.stdout', new_callable=StringIO)
     @patch('gsheetsdb.console.prompt')
     def test_console_exception(self, prompt, stdout, docopt):
-        docopt.return_value = {'--headers': '0', '--raise': False}
+        docopt.return_value = {
+            '--headers': '0',
+            '--raise': False,
+            '--service-account-file': None,
+            '--subject': None,
+        }
 
         def gen():
             yield 'SELECTSELECTSELECT'
@@ -100,10 +115,8 @@ class ConsoleTestSuite(unittest.TestCase):
         console.main()
         result = stdout.getvalue()
         expected = (
-            'SELECTSELECTSELECT\n'
-            '^\n'
-            'Expected select (at char 0), (line:1, col:1)\n'
-            'GoodBye!\n'
+            'Invalid query: SELECTSELECTSELECT\n'
+            'See ya!\n'
         )
         self.assertEqual(result, expected)
 
@@ -111,7 +124,12 @@ class ConsoleTestSuite(unittest.TestCase):
     @patch('sys.stdout', new_callable=StringIO)
     @patch('gsheetsdb.console.prompt')
     def test_console_raise_exception(self, prompt, stdout, docopt):
-        docopt.return_value = {'--headers': '0', '--raise': True}
+        docopt.return_value = {
+            '--headers': '0',
+            '--raise': True,
+            '--service-account-file': None,
+            '--subject': None,
+        }
 
         def gen():
             yield 'SELECTSELECTSELECT'

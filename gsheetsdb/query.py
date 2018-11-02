@@ -40,7 +40,7 @@ def run_query(baseurl, query, credentials=None):
     if credentials:
         session = AuthorizedSession(credentials)
     else:
-        session = requests.Session()
+        session = Session()
 
     r = session.get(url, headers=headers)
     if r.encoding is None:

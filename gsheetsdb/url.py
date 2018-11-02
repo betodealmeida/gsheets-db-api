@@ -51,4 +51,6 @@ def extract_url(sql):
         return parse_sql(sql)['from']
     except pyparsing.ParseException as e:
         # fallback to regex to extract from
-        return FROM_REGEX.search(sql).group(1).strip('"')
+        match = FROM_REGEX.search(sql)
+        if match:
+            return match.group(1).strip('"')

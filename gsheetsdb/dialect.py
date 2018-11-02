@@ -12,6 +12,7 @@ from sqlalchemy.sql import compiler
 from sqlalchemy import types
 
 import gsheetsdb
+from gsheetsdb.auth import get_credentials_from_auth
 
 
 type_map = {
@@ -103,11 +104,8 @@ class GSheetsDialect(default.DefaultDialect):
         **kwargs
     ):
         super(GSheetsDialect, self).__init__(*args, **kwargs)
-        self.auth = {
-            'service_account_file': service_account_file,
-            'service_account_info': service_account_info,
-            'subject': subject,
-        }
+        self.credentials = get_credentials_from_auth(
+            service_account_file, service_account_info, subject)
 
     @classmethod
     def dbapi(cls):
@@ -124,7 +122,7 @@ class GSheetsDialect(default.DefaultDialect):
                 port=port,
                 database=url.database or '',
             )
-        return ([self.auth], {})
+        return ([self.credentials], {})
 
     def get_schema_names(self, connection, **kwargs):
         if self.url is None:
