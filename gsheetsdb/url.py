@@ -49,7 +49,7 @@ def get_url(url, headers=0, gid=0, sheet=None):
 def extract_url(sql):
     try:
         return parse_sql(sql)['from']
-    except pyparsing.ParseException as e:
+    except pyparsing.ParseException:
         # fallback to regex to extract from
         match = FROM_REGEX.search(sql)
         if match:

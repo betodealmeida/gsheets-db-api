@@ -54,11 +54,13 @@ def escape(identifier, ansi_quotes, should_quote):
 
 def Operator(op, parentheses=False):
     op = ' {0} '.format(op)
+
     def func(self, json):
         out = op.join(self.dispatch(v) for v in json)
         if parentheses:
             out = '({0})'.format(out)
         return out
+
     return func
 
 
@@ -147,10 +149,12 @@ class Formatter:
         return '{0} IS NULL'.format(self.dispatch(value))
 
     def _like(self, pair):
-        return '{0} LIKE {1}'.format(self.dispatch(pair[0]), self.dispatch(pair[1]))
+        return '{0} LIKE {1}'.format(
+            self.dispatch(pair[0]), self.dispatch(pair[1]))
 
     def _is(self, pair):
-        return '{0} IS {1}'.format(self.dispatch(pair[0]), self.dispatch(pair[1]))
+        return '{0} IS {1}'.format(
+            self.dispatch(pair[0]), self.dispatch(pair[1]))
 
     def _in(self, json):
         valid = self.dispatch(json[1])

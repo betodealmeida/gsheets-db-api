@@ -7,7 +7,7 @@ import sqlite3
 
 from gsheetsdb.convert import convert_rows
 from gsheetsdb.exceptions import ProgrammingError
-from gsheetsdb.query import get_description_from_payload, run_query
+from gsheetsdb.query import run_query
 from gsheetsdb.url import extract_url, get_url
 
 
@@ -24,7 +24,7 @@ typemap = {
 
 def adapt_timeofday(timeofday):
     return (
-        3600e6 * timeofday.hour + 
+        3600e6 * timeofday.hour +
         60e6 * timeofday.minute +
         1e6 * timeofday.second +
         timeofday.microsecond

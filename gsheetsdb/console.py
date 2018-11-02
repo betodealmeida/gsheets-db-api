@@ -12,11 +12,10 @@ Options:
   --service-account-file=<file>     Service account file for authentication
   --subject=<subject>               Subject to impersonate
 
-"""
+"""  # noqa: E501
 
 from __future__ import unicode_literals
 
-import json
 import os
 
 from docopt import docopt

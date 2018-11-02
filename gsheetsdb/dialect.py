@@ -4,7 +4,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import OrderedDict
-import json
 
 from six.moves.urllib import parse
 from sqlalchemy.engine import default
