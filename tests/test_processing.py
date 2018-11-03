@@ -227,10 +227,28 @@ class ProcessingTestSuite(unittest.TestCase):
         self.assertTrue(pattern.match({'name': 'Bob'}))
 
     def test_datetrunc_match(self):
-        self.assertTrue(DateTrunc.match(
-            {'select': {'value': {'datetrunc': [{'literal': 'month'}, 'datetime']}}}))
-        self.assertFalse(DateTrunc.match(
-            {'select': {'value': {'datetrunc': [{'literal': 'week'}, 'datetime']}}}))
+        self.assertTrue(
+            DateTrunc.match({
+                'select': {
+                    'value': {
+                        'datetrunc': [
+                            {'literal': 'month'}, 'datetime',
+                        ],
+                    },
+                },
+            })
+        )
+        self.assertFalse(
+            DateTrunc.match({
+                'select': {
+                    'value': {
+                        'datetrunc': [{'literal': 'week'}, 'datetime'],
+                    },
+                },
+            })
+        )
         self.assertFalse(DateTrunc.match({'select': {'value': 'datetime'}}))
-        self.assertFalse(DateTrunc.match({'select': {'value': {'year': 'datetime'}}}))
-        self.assertFalse(DateTrunc.match({'select': {'value': {'month': 'datetime'}}}))
+        self.assertFalse(
+            DateTrunc.match({'select': {'value': {'year': 'datetime'}}}))
+        self.assertFalse(
+            DateTrunc.match({'select': {'value': {'month': 'datetime'}}}))
