@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import re
 
 
-POSITION = re.compile('at line (?P<line>\d+), column (?P<column>\d+)')
+POSITION = re.compile(r'at line (?P<line>\d+), column (?P<column>\d+)')
 
 
 def format_moz_error(query, exception):

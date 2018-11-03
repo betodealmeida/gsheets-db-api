@@ -22,7 +22,7 @@ VALID = re.compile(r'[a-zA-Z_]\w*')
 
 
 def should_quote(identifier):
-    """
+    r"""
     Return true if a given identifier should be quoted.
 
     This is usually true when the identifier:
