@@ -26,3 +26,6 @@
 ## [0.1.6] - 2018-10-30
 - Handle authentication.
 - Fix cursor description in SQLite fallback.
+
+## [0.1.7] - 2018-12-06
+- Fix session when no credentials are passed.
