@@ -142,8 +142,10 @@ class GSheetsDialect(default.DefaultDialect):
         if self.url is None:
             return []
 
-        query = """SELECT * FROM "{catalog}" WHERE C='{schema}'""".format(
-            catalog=self.url, schema=schema)
+        query = 'SELECT * FROM "{catalog}"'.format(catalog=self.url)
+        if schema:
+            query = "{query} WHERE C='{schema}'".format(
+                query=query, schema=schema)
         result = connection.execute(query)
         return [add_headers(row[0], int(row[1])) for row in result.fetchall()]
 
