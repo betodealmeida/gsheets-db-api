@@ -29,3 +29,7 @@
 
 ## [0.1.7] - 2018-12-06
 - Fix session when no credentials are passed.
+
+## [0.1.8] - 2018-12-07
+- Add logging.
+- Fix `CREATE TABLE` when sheet has no headers.
