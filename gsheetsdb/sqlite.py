@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import datetime
+import logging
 import sqlite3
 
 from gsheetsdb.convert import convert_rows
@@ -10,6 +11,8 @@ from gsheetsdb.exceptions import ProgrammingError
 from gsheetsdb.query import run_query
 from gsheetsdb.url import extract_url, get_url
 
+
+logger = logging.getLogger(__name__)
 
 # Google Spreadsheet types to SQLite types
 typemap = {
@@ -46,10 +49,12 @@ sqlite3.register_converter('timeofday', convert_timeofday)
 
 def create_table(cursor, table, payload):
     cols = ', '.join(
-        '"{name}" {type}'.format(name=col['label'], type=typemap[col['type']])
+        '"{name}" {type}'.format(
+            name=col['label'] or col['id'], type=typemap[col['type']])
         for col in payload['table']['cols']
     )
     query = 'CREATE TABLE "{table}" ({cols})'.format(table=table, cols=cols)
+    logger.info(query)
     cursor.execute(query)
 
 
@@ -59,6 +64,7 @@ def insert_into(cursor, table, payload):
     query = 'INSERT INTO "{table}" VALUES ({values})'.format(
         table=table, values=values)
     rows = convert_rows(cols, payload['table']['rows'])
+    logger.info(query)
     cursor.executemany(query, rows)
 
 
@@ -78,6 +84,7 @@ def execute(query, headers=0, credentials=None):
     conn.commit()
 
     # run query in SQLite instead
+    logger.info('SQLite query: {}'.format(query))
     results = cursor.execute(query).fetchall()
     description = cursor.description
 

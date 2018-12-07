@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 from collections import OrderedDict
 import json
+import logging
 
 from google.auth.transport.requests import AuthorizedSession
 from moz_sql_parser import parse as parse_sql
@@ -20,6 +21,8 @@ from gsheetsdb.types import Type
 from gsheetsdb.url import extract_url, get_url
 from gsheetsdb.utils import format_gsheet_error, format_moz_error
 
+
+logger = logging.getLogger(__name__)
 
 # the JSON payload has this in the beginning
 LEADING = ")]}'\n"
@@ -107,6 +110,8 @@ def execute(query, headers=0, credentials=None):
 
     # translate colum names to ids and remove aliases
     translated_query = translate(parsed_query, column_map)
+    logger.info('Original query: {}'.format(query))
+    logger.info('Translated query: {}'.format(translated_query))
 
     # run query
     payload = run_query(baseurl, translated_query, credentials)

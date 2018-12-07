@@ -3,12 +3,16 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import logging
+
 from six import string_types
 
 from gsheetsdb.exceptions import Error, NotSupportedError, ProgrammingError
 from gsheetsdb.query import execute
 from gsheetsdb.sqlite import execute as sqlite_execute
 
+
+logger = logging.getLogger(__name__)
 
 # Google API scopes for authentication
 # https://developers.google.com/chart/interactive/docs/spreadsheets
@@ -136,6 +140,7 @@ class Cursor(object):
             self._results, self.description = execute(
                 query, headers, self.credentials)
         except ProgrammingError:
+            logger.info('Query failed, running in SQLite')
             self._results, self.description = sqlite_execute(
                 query, headers, self.credentials)
         return self
