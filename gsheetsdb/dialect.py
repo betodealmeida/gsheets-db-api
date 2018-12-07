@@ -69,6 +69,19 @@ class GSheetsCompiler(compiler.SQLCompiler):
             column.table.named_with_column = False
         return super(GSheetsCompiler, self).visit_column(column, **kwargs)
 
+    def visit_table(
+        self,
+        table,
+        asfrom=False,
+        iscrud=False,
+        ashint=False,
+        fromhints=None,
+        use_schema=False,
+        **kwargs
+    ):
+        return super(GSheetsCompiler, self).visit_table(
+            table, asfrom, iscrud, ashint, fromhints, False, **kwargs)
+
 
 class GSheetsTypeCompiler(compiler.GenericTypeCompiler):
     pass
