@@ -14,10 +14,6 @@ from gsheetsdb.sqlite import execute as sqlite_execute
 
 logger = logging.getLogger(__name__)
 
-# Google API scopes for authentication
-# https://developers.google.com/chart/interactive/docs/spreadsheets
-SCOPES = ['https://spreadsheets.google.com/feeds']
-
 
 def connect(credentials=None):
     """
