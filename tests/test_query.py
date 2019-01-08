@@ -40,18 +40,18 @@ class QueryTestSuite(unittest.TestCase):
                 ],
             },
         }
-        m.get('http://example.com/&tq=SELECT%20%2A%20LIMIT%200', json=payload)
+        m.get('http://docs.google.com/&tq=SELECT%20%2A%20LIMIT%200', json=payload)
 
-        url = 'http://example.com/'
+        url = 'http://docs.google.com/'
         result = get_column_map(url)
         expected = {'country': 'A', 'cnt': 'B'}
         self.assertEqual(result, expected)
 
     @requests_mock.Mocker()
     def test_run_query(self, m):
-        m.get('http://example.com/&tq=SELECT%20%2A', json='ok')
+        m.get('http://docs.google.com/&tq=SELECT%20%2A', json='ok')
 
-        baseurl = 'http://example.com/'
+        baseurl = 'http://docs.google.com/'
         query = 'SELECT *'
         result = run_query(baseurl, query)
         expected = 'ok'
@@ -59,11 +59,11 @@ class QueryTestSuite(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_run_query_with_credentials(self, m):
-        m.get('http://example.com/&tq=SELECT%20%2A', json='ok')
+        m.get('http://docs.google.com/&tq=SELECT%20%2A', json='ok')
         credentials = Mock()
         credentials.before_request = Mock()
 
-        baseurl = 'http://example.com/'
+        baseurl = 'http://docs.google.com/'
         query = 'SELECT *'
         result = run_query(baseurl, query, credentials)
         expected = 'ok'
@@ -72,12 +72,12 @@ class QueryTestSuite(unittest.TestCase):
     @requests_mock.Mocker()
     def test_run_query_error(self, m):
         m.get(
-            'http://example.com/&tq=SELECT%20%2A',
+            'http://docs.google.com/&tq=SELECT%20%2A',
             text='Error',
             status_code=500,
         )
 
-        baseurl = 'http://example.com/'
+        baseurl = 'http://docs.google.com/'
         query = 'SELECT *'
         with self.assertRaises(exceptions.ProgrammingError):
             run_query(baseurl, query)
@@ -85,9 +85,9 @@ class QueryTestSuite(unittest.TestCase):
     @requests_mock.Mocker()
     def test_run_query_leading(self, m):
         text = '{0}{1}'.format(LEADING, '"ok"')
-        m.get('http://example.com/&tq=SELECT%20%2A', text=text)
+        m.get('http://docs.google.com/&tq=SELECT%20%2A', text=text)
 
-        baseurl = 'http://example.com/'
+        baseurl = 'http://docs.google.com/'
         query = 'SELECT *'
         result = run_query(baseurl, query)
         expected = 'ok'
@@ -103,9 +103,9 @@ class QueryTestSuite(unittest.TestCase):
             },
             status=200,
         )
-        m.get('http://example.com/&tq=SELECT%20%2A', raw=raw)
+        m.get('http://docs.google.com/&tq=SELECT%20%2A', raw=raw)
 
-        baseurl = 'http://example.com/'
+        baseurl = 'http://docs.google.com/'
         query = 'SELECT *'
         result = run_query(baseurl, query)
         expected = 'ok'
@@ -171,7 +171,7 @@ class QueryTestSuite(unittest.TestCase):
             },
         }
         m.get(
-            'http://example.com/gviz/tq?headers=1&gid=0&'
+            'http://docs.google.com/gviz/tq?headers=1&gid=0&'
             'tq=SELECT%20%2A%20LIMIT%200',
             json=header_payload,
         )
@@ -191,11 +191,11 @@ class QueryTestSuite(unittest.TestCase):
             },
         }
         m.get(
-            'http://example.com/gviz/tq?headers=1&gid=0&tq=SELECT%20%2A',
+            'http://docs.google.com/gviz/tq?headers=1&gid=0&tq=SELECT%20%2A',
             json=query_payload,
         )
 
-        query = 'SELECT * FROM "http://example.com/"'
+        query = 'SELECT * FROM "http://docs.google.com/"'
         headers = 1
         results, description = execute(query, headers)
         Row = namedtuple('Row', 'country cnt')
@@ -224,7 +224,7 @@ class QueryTestSuite(unittest.TestCase):
             },
         }
         m.get(
-            'http://example.com/gviz/tq?headers=1&gid=0&'
+            'http://docs.google.com/gviz/tq?headers=1&gid=0&'
             'tq=SELECT%20%2A%20LIMIT%200',
             json=header_payload,
         )
@@ -247,12 +247,12 @@ class QueryTestSuite(unittest.TestCase):
             },
         }
         m.get(
-            'http://example.com/gviz/tq?headers=1&gid=0&'
+            'http://docs.google.com/gviz/tq?headers=1&gid=0&'
             'tq=SELECT%20COUNT(B)%2C%20COUNT(A)',
             json=query_payload,
         )
 
-        query = 'SELECT COUNT(*) AS total FROM "http://example.com/"'
+        query = 'SELECT COUNT(*) AS total FROM "http://docs.google.com/"'
         headers = 1
         results, description = execute(query, headers)
         Row = namedtuple('Row', 'total')
@@ -265,6 +265,10 @@ class QueryTestSuite(unittest.TestCase):
     def test_execute_bad_query(self):
         with self.assertRaises(exceptions.ProgrammingError):
             execute('SELECT ORDER BY FROM table')
+
+    def test_execute_invalid_url(self):
+        with self.assertRaises(exceptions.InterfaceError):
+            execute('SELECT * FROM "http://example.com/"')
 
     @requests_mock.Mocker()
     def test_execute_gsheets_error(self, m):
@@ -282,7 +286,7 @@ class QueryTestSuite(unittest.TestCase):
             },
         }
         m.get(
-            'http://example.com/gviz/tq?headers=1&gid=0&'
+            'http://docs.google.com/gviz/tq?headers=1&gid=0&'
             'tq=SELECT%20%2A%20LIMIT%200',
             json=header_payload,
         )
@@ -291,12 +295,12 @@ class QueryTestSuite(unittest.TestCase):
             'errors': [{'detailed_message': 'Error!'}],
         }
         m.get(
-            'http://example.com/gviz/tq?headers=1&gid=0&'
+            'http://docs.google.com/gviz/tq?headers=1&gid=0&'
             'tq=SELECT%20COUNT(B)%2C%20COUNT(A)',
             json=query_payload,
         )
 
-        query = 'SELECT COUNT(*) AS total FROM "http://example.com/"'
+        query = 'SELECT COUNT(*) AS total FROM "http://docs.google.com/"'
         headers = 1
         with self.assertRaises(exceptions.ProgrammingError):
             execute(query, headers)

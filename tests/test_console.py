@@ -72,16 +72,16 @@ class ConsoleTestSuite(unittest.TestCase):
             },
         }
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
             json=header_payload,
         )
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A',
             json=query_payload,
         )
 
         def gen():
-            yield 'SELECT * FROM "http://example.com/"'
+            yield 'SELECT * FROM "http://docs.google.com/"'
             raise EOFError()
 
         prompt.side_effect = gen()

@@ -19,17 +19,17 @@ from .context import add_headers, connect, gsheetsdb, GSheetsDialect, Type
 class DialectTestSuite(unittest.TestCase):
 
     def test_add_headers(self):
-        url = 'http://example.com/'
+        url = 'http://docs.google.com/'
         headers = 10
         result = add_headers(url, headers)
-        expected = 'http://example.com/?headers=10&gid=0'
+        expected = 'http://docs.google.com/?headers=10&gid=0'
         self.assertEqual(result, expected)
 
     def test_add_headers_with_gid(self):
-        url = 'http://example.com/#gid=10'
+        url = 'http://docs.google.com/#gid=10'
         headers = 10
         result = add_headers(url, headers)
-        expected = 'http://example.com/?headers=10&gid=10'
+        expected = 'http://docs.google.com/?headers=10&gid=10'
         self.assertEqual(result, expected)
 
     def test_cls_dbapi(self):
@@ -43,11 +43,11 @@ class DialectTestSuite(unittest.TestCase):
         self.assertEqual(args, ([None], {}))
         self.assertIsNone(dialect.url)
 
-        url = make_url('gsheets://example.com/')
+        url = make_url('gsheets://docs.google.com/')
         args = dialect.create_connect_args(url)
         self.assertEqual(args, ([None], {}))
         self.assertEqual(
-            dialect.url, '{0}://example.com/'.format(dialect.scheme))
+            dialect.url, '{0}://docs.google.com/'.format(dialect.scheme))
 
     def test_get_schema_names(self):
         connection = Mock()
@@ -58,7 +58,7 @@ class DialectTestSuite(unittest.TestCase):
         connection.execute.return_value = result
 
         dialect = GSheetsDialect()
-        url = make_url('gsheets://example.com/')
+        url = make_url('gsheets://docs.google.com/')
         dialect.create_connect_args(url)
         result = dialect.get_schema_names(connection)
         expected = ['default', 'public']
@@ -79,18 +79,18 @@ class DialectTestSuite(unittest.TestCase):
         result = Mock()
         result.fetchall = Mock()
         result.fetchall.return_value = [
-            ('http://example.com/edit#gid=0', 2),
-            ('http://example.com/edit#gid=1', 1),
+            ('http://docs.google.com/edit#gid=0', 2),
+            ('http://docs.google.com/edit#gid=1', 1),
         ]
         connection.execute.return_value = result
 
         dialect = GSheetsDialect()
-        url = make_url('gsheets://example.com/')
+        url = make_url('gsheets://docs.google.com/')
         dialect.create_connect_args(url)
         result = dialect.get_table_names(connection)
         expected = [
-            'http://example.com/edit?headers=2&gid=0',
-            'http://example.com/edit?headers=1&gid=1',
+            'http://docs.google.com/edit?headers=2&gid=0',
+            'http://docs.google.com/edit?headers=1&gid=1',
         ]
         self.assertEqual(result, expected)
 
@@ -109,21 +109,21 @@ class DialectTestSuite(unittest.TestCase):
         result = Mock()
         result.fetchall = Mock()
         result.fetchall.return_value = [
-            ('http://example.com/edit#gid=0', 2),
-            ('http://example.com/edit#gid=1', 1),
+            ('http://docs.google.com/edit#gid=0', 2),
+            ('http://docs.google.com/edit#gid=1', 1),
         ]
         connection.execute.return_value = result
 
         dialect = GSheetsDialect()
-        url = make_url('gsheets://example.com/')
+        url = make_url('gsheets://docs.google.com/')
         dialect.create_connect_args(url)
 
         self.assertTrue(
             dialect.has_table(
-                connection, 'http://example.com/edit?headers=2&gid=0'))
+                connection, 'http://docs.google.com/edit?headers=2&gid=0'))
         self.assertFalse(
             dialect.has_table(
-                connection, 'http://example.com/edit?headers=2&gid=1'))
+                connection, 'http://docs.google.com/edit?headers=2&gid=1'))
 
     def test_has_table_no_catalog(self):
         connection = connect()
@@ -149,7 +149,7 @@ class DialectTestSuite(unittest.TestCase):
         connection.execute.return_value = result
 
         dialect = GSheetsDialect()
-        url = make_url('gsheets://example.com/')
+        url = make_url('gsheets://docs.google.com/')
         dialect.create_connect_args(url)
 
         result = dialect.get_columns(connection, 'SOME TABLE')
@@ -202,7 +202,7 @@ class DialectTestSuite(unittest.TestCase):
 
     def test_get_table_options(self):
         connection = connect()
-        table_name = 'http://example.com/'
+        table_name = 'http://docs.google.com/'
         dialect = GSheetsDialect()
         result = dialect.get_table_options(connection, table_name)
         expected = {}
@@ -210,7 +210,7 @@ class DialectTestSuite(unittest.TestCase):
 
     def test_get_pk_constraint(self):
         connection = connect()
-        table_name = 'http://example.com/'
+        table_name = 'http://docs.google.com/'
         dialect = GSheetsDialect()
         result = dialect.get_pk_constraint(connection, table_name)
         expected = {'constrained_columns': [], 'name': None}
@@ -218,7 +218,7 @@ class DialectTestSuite(unittest.TestCase):
 
     def test_get_foreign_keys(self):
         connection = connect()
-        table_name = 'http://example.com/'
+        table_name = 'http://docs.google.com/'
         dialect = GSheetsDialect()
         result = dialect.get_foreign_keys(connection, table_name)
         expected = []
@@ -226,7 +226,7 @@ class DialectTestSuite(unittest.TestCase):
 
     def test_get_check_constraints(self):
         connection = connect()
-        table_name = 'http://example.com/'
+        table_name = 'http://docs.google.com/'
         dialect = GSheetsDialect()
         result = dialect.get_check_constraints(connection, table_name)
         expected = []
@@ -234,7 +234,7 @@ class DialectTestSuite(unittest.TestCase):
 
     def test_get_table_comment(self):
         connection = connect()
-        table_name = 'http://example.com/'
+        table_name = 'http://docs.google.com/'
         dialect = GSheetsDialect()
         result = dialect.get_table_comment(connection, table_name)
         expected = {'text': ''}
@@ -242,7 +242,7 @@ class DialectTestSuite(unittest.TestCase):
 
     def test_get_indexes(self):
         connection = connect()
-        table_name = 'http://example.com/'
+        table_name = 'http://docs.google.com/'
         dialect = GSheetsDialect()
         result = dialect.get_indexes(connection, table_name)
         expected = []
@@ -250,7 +250,7 @@ class DialectTestSuite(unittest.TestCase):
 
     def test_get_unique_constraints(self):
         connection = connect()
-        table_name = 'http://example.com/'
+        table_name = 'http://docs.google.com/'
         dialect = GSheetsDialect()
         result = dialect.get_unique_constraints(connection, table_name)
         expected = []
@@ -258,7 +258,7 @@ class DialectTestSuite(unittest.TestCase):
 
     def test_get_view_definition(self):
         connection = connect()
-        view_name = 'http://example.com/'
+        view_name = 'http://docs.google.com/'
         dialect = GSheetsDialect()
         result = dialect.get_view_definition(connection, view_name)
         self.assertIsNone(result)
@@ -299,13 +299,13 @@ class DialectTestSuite(unittest.TestCase):
             },
         }
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
             json=header_payload,
         )
         engine = create_engine('gsheets://')
         table = Table(
-            'http://example.com/', MetaData(bind=engine), autoload=True)
+            'http://docs.google.com/', MetaData(bind=engine), autoload=True)
         query = select([table.columns.country], from_obj=table)
         result = str(query)
-        expected = 'SELECT country \nFROM "http://example.com/"'
+        expected = 'SELECT country \nFROM "http://docs.google.com/"'
         self.assertEqual(result, expected)

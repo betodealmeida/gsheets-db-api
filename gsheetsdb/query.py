@@ -14,7 +14,7 @@ from requests import Session
 from six.moves.urllib import parse
 
 from gsheetsdb.convert import convert_rows
-from gsheetsdb.exceptions import ProgrammingError
+from gsheetsdb.exceptions import InterfaceError, ProgrammingError
 from gsheetsdb.processors import processors
 from gsheetsdb.translator import extract_column_aliases, translate
 from gsheetsdb.types import Type
@@ -95,6 +95,11 @@ def execute(query, headers=0, credentials=None):
     # extract URL from the `FROM` clause
     from_ = extract_url(query)
     baseurl = get_url(from_, headers)
+
+    # verify that URL is actually a Google spreadsheet
+    parsed = parse.urlparse(baseurl)
+    if not parsed.netloc == 'docs.google.com':
+        raise InterfaceError('Invalid URL, must be a docs.google.com URL!')
 
     # map between labels and ids, eg, `{ 'country': 'A' }`
     column_map = get_column_map(baseurl, credentials)

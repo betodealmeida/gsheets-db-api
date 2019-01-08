@@ -25,7 +25,7 @@ class UtilsTestSuite(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_format_gsheet_error(self):
-        query = 'SELECT A + B FROM "http://example.com"'
+        query = 'SELECT A + B FROM "http://docs.google.com"'
         translated_query = 'SELECT A + B'
         errors = [{
             'reason': 'invalid_query',
@@ -39,7 +39,7 @@ class UtilsTestSuite(unittest.TestCase):
         result = format_gsheet_error(query, translated_query, errors)
         expected = (
             'Original query:\n'
-            'SELECT A + B FROM "http://example.com"\n\n'
+            'SELECT A + B FROM "http://docs.google.com"\n\n'
             'Translated query:\n'
             'SELECT A + B\n\n'
             'Error:\n'
@@ -49,7 +49,7 @@ class UtilsTestSuite(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_format_gsheet_error_caret(self):
-        query = 'SELECT A IS NULL FROM "http://example.com"'
+        query = 'SELECT A IS NULL FROM "http://docs.google.com"'
         translated_query = 'SELECT A IS NULL'
         errors = [{
             'reason': 'invalid_query',
@@ -86,7 +86,7 @@ class UtilsTestSuite(unittest.TestCase):
         result = format_gsheet_error(query, translated_query, errors)
         expected = (
             'Original query:\n'
-            'SELECT A IS NULL FROM "http://example.com"\n\n'
+            'SELECT A IS NULL FROM "http://docs.google.com"\n\n'
             'Translated query:\n'
             'SELECT A IS NULL\n\n'
             'Error:\n'

@@ -78,17 +78,17 @@ class DBTestSuite(unittest.TestCase):
     @requests_mock.Mocker()
     def test_connection_execute(self, m):
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
             json=self.header_payload,
         )
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A',
             json=self.query_payload,
         )
 
         with Connection() as conn:
             result = conn.execute(
-                'SELECT * FROM "http://example.com/"').fetchall()
+                'SELECT * FROM "http://docs.google.com/"').fetchall()
         Row = namedtuple('Row', 'country cnt')
         expected = [Row(country=u'BR', cnt=1.0), Row(country=u'IN', cnt=2.0)]
         self.assertEqual(result, expected)
@@ -96,18 +96,18 @@ class DBTestSuite(unittest.TestCase):
     @requests_mock.Mocker()
     def test_cursor_execute(self, m):
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
             json=self.header_payload,
         )
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A',
             json=self.query_payload,
         )
 
         with Connection() as conn:
             cursor = conn.cursor()
             result = cursor.execute(
-                'SELECT * FROM "http://example.com/"').fetchall()
+                'SELECT * FROM "http://docs.google.com/"').fetchall()
         Row = namedtuple('Row', 'country cnt')
         expected = [Row(country=u'BR', cnt=1.0), Row(country=u'IN', cnt=2.0)]
         self.assertEqual(result, expected)
@@ -116,16 +116,16 @@ class DBTestSuite(unittest.TestCase):
         conn = Connection()
         cursor = conn.cursor()
         with self.assertRaises(exceptions.NotSupportedError):
-            cursor.executemany('SELECT * FROM "http://example.com/"')
+            cursor.executemany('SELECT * FROM "http://docs.google.com/"')
 
     @requests_mock.Mocker()
     def test_cursor(self, m):
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
             json=self.header_payload,
         )
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A',
             json=self.query_payload,
         )
 
@@ -137,11 +137,11 @@ class DBTestSuite(unittest.TestCase):
     @requests_mock.Mocker()
     def test_cursor_rowcount(self, m):
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
             json=self.header_payload,
         )
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A',
             json=self.query_payload,
         )
 
@@ -151,23 +151,23 @@ class DBTestSuite(unittest.TestCase):
         with self.assertRaises(exceptions.Error):
             cursor.rowcount()
 
-        cursor.execute('SELECT * FROM "http://example.com/"')
+        cursor.execute('SELECT * FROM "http://docs.google.com/"')
         self.assertEqual(cursor.rowcount, 2)
 
     @requests_mock.Mocker()
     def test_cursor_fetchone(self, m):
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
             json=self.header_payload,
         )
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A',
             json=self.query_payload,
         )
 
         conn = Connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM "http://example.com/"')
+        cursor.execute('SELECT * FROM "http://docs.google.com/"')
         Row = namedtuple('Row', 'country cnt')
 
         self.assertEqual(cursor.fetchone(), Row(country=u'BR', cnt=1.0))
@@ -177,17 +177,17 @@ class DBTestSuite(unittest.TestCase):
     @requests_mock.Mocker()
     def test_cursor_fetchall(self, m):
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
             json=self.header_payload,
         )
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A',
             json=self.query_payload,
         )
 
         conn = Connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM "http://example.com/"')
+        cursor.execute('SELECT * FROM "http://docs.google.com/"')
         Row = namedtuple('Row', 'country cnt')
 
         self.assertEqual(cursor.fetchone(), Row(country=u'BR', cnt=1.0))
@@ -196,17 +196,17 @@ class DBTestSuite(unittest.TestCase):
     @requests_mock.Mocker()
     def test_cursor_fetchmany(self, m):
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
             json=self.header_payload,
         )
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A',
             json=self.query_payload,
         )
 
         conn = Connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM "http://example.com/"')
+        cursor.execute('SELECT * FROM "http://docs.google.com/"')
         Row = namedtuple('Row', 'country cnt')
 
         self.assertEqual(cursor.fetchmany(1), [Row(country=u'BR', cnt=1.0)])
@@ -216,17 +216,17 @@ class DBTestSuite(unittest.TestCase):
     @requests_mock.Mocker()
     def test_cursor_iter(self, m):
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
             json=self.header_payload,
         )
         m.get(
-            'http://example.com/gviz/tq?gid=0&tq=SELECT%20%2A',
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A',
             json=self.query_payload,
         )
 
         conn = Connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM "http://example.com/"')
+        cursor.execute('SELECT * FROM "http://docs.google.com/"')
         Row = namedtuple('Row', 'country cnt')
 
         self.assertEqual(

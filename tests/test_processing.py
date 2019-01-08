@@ -20,7 +20,7 @@ class ProcessingTestSuite(unittest.TestCase):
 
     def test_processor(self):
         processor = Processor()
-        sql = 'SELECT * FROM "http://example.com"'
+        sql = 'SELECT * FROM "http://docs.google.com"'
         parsed_query = parse(sql)
         payload = {}
 
@@ -30,7 +30,7 @@ class ProcessingTestSuite(unittest.TestCase):
         self.assertEqual(payload, processor.post_process(payload, [None]))
 
     def test_count_star(self):
-        sql = 'SELECT COUNT(*) AS total FROM "http://example.com"'
+        sql = 'SELECT COUNT(*) AS total FROM "http://docs.google.com"'
         parsed_query = parse(sql)
         column_map = OrderedDict(sorted({'country': 'A', 'cnt': 'B'}.items()))
 
@@ -45,7 +45,7 @@ class ProcessingTestSuite(unittest.TestCase):
                 COUNT(cnt) AS __CountStar__cnt
               , COUNT(country) AS __CountStar__country
             FROM
-                "http://example.com"
+                "http://docs.google.com"
         ''')
         self.assertEqual(result, expected)
 
@@ -84,7 +84,7 @@ class ProcessingTestSuite(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_count_star_no_results(self):
-        sql = 'SELECT COUNT(*) AS total FROM "http://example.com"'
+        sql = 'SELECT COUNT(*) AS total FROM "http://docs.google.com"'
         parsed_query = parse(sql)
         column_map = OrderedDict(sorted({'country': 'A', 'cnt': 'B'}.items()))
 
@@ -122,7 +122,7 @@ class ProcessingTestSuite(unittest.TestCase):
 
     def test_count_star_with_groupby(self):
         sql = (
-            'SELECT country, COUNT(*) FROM "http://example.com" '
+            'SELECT country, COUNT(*) FROM "http://docs.google.com" '
             'GROUP BY country'
         )
         parsed_query = parse(sql)
@@ -141,7 +141,7 @@ class ProcessingTestSuite(unittest.TestCase):
               , COUNT(cnt) AS __CountStar__cnt
               , COUNT(country) AS __CountStar__country
             FROM
-                "http://example.com"
+                "http://docs.google.com"
             GROUP BY
                 country
         ''')
@@ -205,7 +205,7 @@ class ProcessingTestSuite(unittest.TestCase):
         self.assertFalse(pattern.match(parsed_query))
 
         parsed_query = parse(
-            'SELECT country, COUNT(*) FROM "http://example.com" '
+            'SELECT country, COUNT(*) FROM "http://docs.google.com" '
             'GROUP BY country')
         self.assertTrue(pattern.match(parsed_query))
 
