@@ -302,6 +302,10 @@ class DialectTestSuite(unittest.TestCase):
             'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A%20LIMIT%200',
             json=header_payload,
         )
+        m.get(
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A',
+            json=header_payload,
+        )
         engine = create_engine('gsheets://')
         table = Table(
             'http://docs.google.com/', MetaData(bind=engine), autoload=True)

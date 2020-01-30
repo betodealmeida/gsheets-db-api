@@ -40,7 +40,8 @@ class QueryTestSuite(unittest.TestCase):
                 ],
             },
         }
-        m.get('http://docs.google.com/&tq=SELECT%20%2A%20LIMIT%200', json=payload)
+        m.get('http://docs.google.com/&tq=SELECT%20%2A%20LIMIT%200',
+              json=payload)
 
         url = 'http://docs.google.com/'
         result = get_column_map(url)

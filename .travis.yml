@@ -13,7 +13,6 @@ matrix:
 
 install:
     - pip install codecov
-    - pip install git+https://github.com/betodealmeida/moz-sql-parser.git@fix_empty_functions
     - pip install -e .[cli,dev,sqlalchemy]
 
 script:

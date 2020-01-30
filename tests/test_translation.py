@@ -116,7 +116,14 @@ class TranslationTestSuite(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_unalias_orderby(self):
-        sql = 'SELECT cnt AS value FROM "http://docs.google.com" ORDER BY value'
+        sql = '''
+        SELECT
+            cnt AS value
+        FROM
+            "http://docs.google.com"
+        ORDER BY
+            value
+        '''
         expected = 'SELECT B ORDER BY B'
         result = translate(parse(sql), {'cnt': 'B'})
         self.assertEqual(result, expected)
