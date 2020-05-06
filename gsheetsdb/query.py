@@ -134,6 +134,10 @@ def execute(query, headers=0, credentials=None):
         if alias is not None:
             col['label'] = alias
 
+    # remove columns with no label/name
+    cols = [col for col in cols if col['label']]
+    payload['table']['cols'] = cols
+
     description = get_description_from_payload(payload)
 
     # convert rows to proper type (datetime, eg)

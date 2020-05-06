@@ -45,8 +45,9 @@ def convert_rows(cols, rows):
     for row in rows:
         values = []
         for i, col in enumerate(row['c']):
-            converter = converters[cols[i]['type']]
-            values.append(converter(col['v']) if col else None)
+            if i < len(cols):
+                converter = converters[cols[i]['type']]
+                values.append(converter(col['v']) if col else None)
         results.append(Row(*values))
 
     return results
