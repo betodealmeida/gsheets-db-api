@@ -33,3 +33,9 @@
 ## [0.1.8] - 2018-12-07
 - Add logging.
 - Fix `CREATE TABLE` when sheet has no headers.
+
+## [0.1.9] - 2019-01-07
+- Ensure URL is from docs.google.com.
+
+## [0.1.10] - 2020-05-06
+- Strip blank columns caused by edits.
