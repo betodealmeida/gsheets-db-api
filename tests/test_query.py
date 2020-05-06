@@ -263,6 +263,60 @@ class QueryTestSuite(unittest.TestCase):
             [('total', Type.NUMBER, None, None, None, None, True)],
         )
 
+    @requests_mock.Mocker()
+    def test_execute_with_empty_columns(self, m):
+        header_payload = {
+            'table': {
+                'cols': [
+                    {'id': 'A', 'label': 'country', 'type': 'string'},
+                    {
+                        'id': 'B',
+                        'label': 'cnt',
+                        'type': 'number',
+                        'pattern': 'General',
+                    },
+                    {'id': 'C', 'label': '', 'type': 'string'}
+                ],
+            },
+        }
+        m.get(
+            'http://docs.google.com/gviz/tq?gid=0&'
+            'tq=SELECT%20%2A%20LIMIT%200',
+            json=header_payload,
+        )
+        query_payload = {
+            'status': 'ok',
+            'table': {
+                'cols': [
+                    {'id': 'A', 'label': 'country', 'type': 'string'},
+                    {
+                        'id': 'B',
+                        'label': 'cnt',
+                        'type': 'number',
+                        'pattern': 'General',
+                    },
+                    {'id': 'C', 'label': '', 'type': 'string'},
+                ],
+                'rows': [{'c': [{'v': 'BR'}, {'v': 1.0, 'f': '1'}, None]}],
+            },
+        }
+        m.get(
+            'http://docs.google.com/gviz/tq?gid=0&tq=SELECT%20%2A',
+            json=query_payload,
+        )
+
+        query = 'SELECT * FROM "http://docs.google.com/"'
+        results, description = execute(query)
+        Row = namedtuple('Row', 'country cnt')
+        self.assertEqual(results, [Row(country=u'BR', cnt=1.0)])
+        self.assertEqual(
+            description,
+            [
+                ('country', Type.STRING, None, None, None, None, True),
+                ('cnt', Type.NUMBER, None, None, None, None, True),
+            ],
+        )
+
     def test_execute_bad_query(self):
         with self.assertRaises(exceptions.ProgrammingError):
             execute('SELECT ORDER BY FROM table')

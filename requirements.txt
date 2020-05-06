@@ -6,4 +6,4 @@ prompt_toolkit==2.0.4
 SQLAlchemy==1.2.11
 six==1.11.0
 requests==2.20.0
-moz_sql_parser==2.18.18240
+moz_sql_parser==3.32.20026
