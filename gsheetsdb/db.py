@@ -135,7 +135,7 @@ class Cursor(object):
         try:
             self._results, self.description = execute(
                 query, headers, self.credentials)
-        except ProgrammingError:
+        except (ProgrammingError, NotSupportedError):
             logger.info('Query failed, running in SQLite')
             self._results, self.description = sqlite_execute(
                 query, headers, self.credentials)

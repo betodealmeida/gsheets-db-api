@@ -9,6 +9,7 @@ from moz_sql_parser import parse as parse_sql
 import pyparsing
 import re
 from six.moves.urllib import parse
+from gsheetsdb.exceptions import ProgrammingError
 
 
 FROM_REGEX = re.compile(' from ("http.*?")', re.IGNORECASE)
@@ -48,9 +49,15 @@ def get_url(url, headers=0, gid=0, sheet=None):
 
 def extract_url(sql):
     try:
-        return parse_sql(sql)['from']
+        url = parse_sql(sql)['from']
     except pyparsing.ParseException:
         # fallback to regex to extract from
         match = FROM_REGEX.search(sql)
         if match:
             return match.group(1).strip('"')
+        return
+
+    while isinstance(url, dict):
+        url = url['value']['from']
+
+    return url

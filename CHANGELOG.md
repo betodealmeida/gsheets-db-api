@@ -39,3 +39,6 @@
 
 ## [0.1.10] - 2020-05-06
 - Strip blank columns caused by edits.
+
+## [0.1.11] - 2020-09-21
+- Handle subqueries by falling back to Sqlite
