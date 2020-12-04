@@ -42,3 +42,6 @@
 
 ## [0.1.11] - 2020-09-21
 - Handle subqueries by falling back to Sqlite
+
+## [0.1.12] - 2020-12-04
+- Implement `do_ping` method always returning true

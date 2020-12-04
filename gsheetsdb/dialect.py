@@ -15,51 +15,52 @@ from gsheetsdb.auth import get_credentials_from_auth
 
 
 type_map = {
-    'string': types.String,
-    'number': types.Numeric,
-    'boolean': types.Boolean,
-    'date': types.DATE,
-    'datetime': types.DATETIME,
-    'timeofday': types.TIME,
+    "string": types.String,
+    "number": types.Numeric,
+    "boolean": types.Boolean,
+    "date": types.DATE,
+    "datetime": types.DATETIME,
+    "timeofday": types.TIME,
 }
 
 
 def add_headers(url, headers):
     parts = parse.urlparse(url)
-    if parts.fragment.startswith('gid='):
-        gid = parts.fragment[len('gid='):]
+    if parts.fragment.startswith("gid="):
+        gid = parts.fragment[len("gid=") :]
     else:
         gid = 0
-    params = parse.urlencode(OrderedDict([('headers', headers), ('gid', gid)]))
+    params = parse.urlencode(OrderedDict([("headers", headers), ("gid", gid)]))
     return parse.urlunparse(
-        (parts.scheme, parts.netloc, parts.path, None, params, None))
+        (parts.scheme, parts.netloc, parts.path, None, params, None)
+    )
 
 
 class GSheetsIdentifierPreparer(compiler.IdentifierPreparer):
     # https://developers.google.com/chart/interactive/docs/querylanguage#reserved-words
     reserved_words = {
-        'and',
-        'asc',
-        'by',
-        'date',
-        'datetime',
-        'desc',
-        'false',
-        'format',
-        'group',
-        'label',
-        'limit',
-        'not',
-        'offset',
-        'options',
-        'or',
-        'order',
-        'pivot',
-        'select',
-        'timeofday',
-        'timestamp',
-        'true',
-        'where',
+        "and",
+        "asc",
+        "by",
+        "date",
+        "datetime",
+        "desc",
+        "false",
+        "format",
+        "group",
+        "label",
+        "limit",
+        "not",
+        "offset",
+        "options",
+        "or",
+        "order",
+        "pivot",
+        "select",
+        "timeofday",
+        "timestamp",
+        "true",
+        "where",
     }
 
 
@@ -80,7 +81,8 @@ class GSheetsCompiler(compiler.SQLCompiler):
         **kwargs
     ):
         return super(GSheetsCompiler, self).visit_table(
-            table, asfrom, iscrud, ashint, fromhints, False, **kwargs)
+            table, asfrom, iscrud, ashint, fromhints, False, **kwargs
+        )
 
 
 class GSheetsTypeCompiler(compiler.GenericTypeCompiler):
@@ -91,9 +93,9 @@ class GSheetsDialect(default.DefaultDialect):
 
     # TODO: review these
     # http://docs.sqlalchemy.org/en/latest/core/internals.html#sqlalchemy.engine.interfaces.Dialect
-    name = 'gsheets'
-    scheme = 'https'
-    driver = 'rest'
+    name = "gsheets"
+    scheme = "https"
+    driver = "rest"
     preparer = GSheetsIdentifierPreparer
     statement_compiler = GSheetsCompiler
     type_compiler = GSheetsTypeCompiler
@@ -117,22 +119,26 @@ class GSheetsDialect(default.DefaultDialect):
     ):
         super(GSheetsDialect, self).__init__(*args, **kwargs)
         self.credentials = get_credentials_from_auth(
-            service_account_file, service_account_info, subject)
+            service_account_file, service_account_info, subject
+        )
 
     @classmethod
     def dbapi(cls):
         return gsheetsdb
 
+    def do_ping(self, dbapi_connection):
+        return True
+
     def create_connect_args(self, url):
-        port = ':{url.port}'.format(url=url) if url.port else ''
+        port = ":{url.port}".format(url=url) if url.port else ""
         if url.host is None:
             self.url = None
         else:
-            self.url = '{scheme}://{host}{port}/{database}'.format(
+            self.url = "{scheme}://{host}{port}/{database}".format(
                 scheme=self.scheme,
                 host=url.host,
                 port=port,
-                database=url.database or '',
+                database=url.database or "",
             )
         return ([self.credentials], {})
 
@@ -141,7 +147,8 @@ class GSheetsDialect(default.DefaultDialect):
             return []
 
         query = 'SELECT C, COUNT(C) FROM "{catalog}" GROUP BY C'.format(
-            catalog=self.url)
+            catalog=self.url
+        )
         result = connection.execute(query)
         return [row[0] for row in result.fetchall()]
 
@@ -157,8 +164,7 @@ class GSheetsDialect(default.DefaultDialect):
 
         query = 'SELECT * FROM "{catalog}"'.format(catalog=self.url)
         if schema:
-            query = "{query} WHERE C='{schema}'".format(
-                query=query, schema=schema)
+            query = "{query} WHERE C='{schema}'".format(query=query, schema=schema)
         result = connection.execute(query)
         return [add_headers(row[0], int(row[1])) for row in result.fetchall()]
 
@@ -173,51 +179,33 @@ class GSheetsDialect(default.DefaultDialect):
         result = connection.execute(query)
         return [
             {
-                'name': col[0],
-                'type': type_map[col[1].value],
-                'nullable': True,
-                'default': None,
+                "name": col[0],
+                "type": type_map[col[1].value],
+                "nullable": True,
+                "default": None,
             }
             for col in result._cursor_description()
         ]
 
     def get_pk_constraint(self, connection, table_name, schema=None, **kwargs):
-        return {'constrained_columns': [], 'name': None}
+        return {"constrained_columns": [], "name": None}
 
     def get_foreign_keys(self, connection, table_name, schema=None, **kwargs):
         return []
 
-    def get_check_constraints(
-        self,
-        connection,
-        table_name,
-        schema=None,
-        **kwargs
-    ):
+    def get_check_constraints(self, connection, table_name, schema=None, **kwargs):
         return []
 
     def get_table_comment(self, connection, table_name, schema=None, **kwargs):
-        return {'text': ''}
+        return {"text": ""}
 
     def get_indexes(self, connection, table_name, schema=None, **kwargs):
         return []
 
-    def get_unique_constraints(
-        self,
-        connection,
-        table_name,
-        schema=None,
-        **kwargs
-    ):
+    def get_unique_constraints(self, connection, table_name, schema=None, **kwargs):
         return []
 
-    def get_view_definition(
-        self,
-        connection,
-        view_name,
-        schema=None,
-        **kwargs
-    ):
+    def get_view_definition(self, connection, view_name, schema=None, **kwargs):
         pass
 
     def do_rollback(self, dbapi_connection):
