@@ -9,14 +9,15 @@ from moz_sql_parser import parse as parse_sql
 import pyparsing
 import re
 from six.moves.urllib import parse
-from gsheetsdb.exceptions import ProgrammingError
 
 
-FROM_REGEX = re.compile(' from ("http.*?")', re.IGNORECASE)
+FROM_REGEX = re.compile(' from ("http.*?")', re.IGNORECASE)  # original, only takes select, otherwise raise errors
 
 
 def get_url(url, headers=0, gid=0, sheet=None):
+
     parts = parse.urlparse(url)
+
     if parts.path.endswith('/edit'):
         path = parts.path[:-len('/edit')]
     else:
@@ -24,10 +25,13 @@ def get_url(url, headers=0, gid=0, sheet=None):
     path = '/'.join((path.rstrip('/'), 'gviz/tq'))
 
     qs = parse.parse_qs(parts.query)
+
     if 'headers' in qs:
         headers = int(qs['headers'][-1])
+
     if 'gid' in qs:
         gid = qs['gid'][-1]
+
     if 'sheet' in qs:
         sheet = qs['sheet'][-1]
 
@@ -48,11 +52,14 @@ def get_url(url, headers=0, gid=0, sheet=None):
 
 
 def extract_url(sql):
+
     try:
         url = parse_sql(sql)['from']
+
     except pyparsing.ParseException:
         # fallback to regex to extract from
         match = FROM_REGEX.search(sql)
+
         if match:
             return match.group(1).strip('"')
         return
@@ -61,3 +68,24 @@ def extract_url(sql):
         url = url['value']['from']
 
     return url
+
+
+# Function to extract url from any sql statement
+def url_from_sql(sql):
+    """
+    Extract url from any sql statement.
+    :param sql:
+    :return:
+    """
+
+    try:
+        parsed_sql = re.split('[( , " )]', str(sql))
+
+        for i, val in enumerate(parsed_sql):
+            if val.startswith('https:'):
+                sql_url = parsed_sql[i]
+                return sql_url
+
+    except Exception as e:
+        print("Error: {}".format(e))
+

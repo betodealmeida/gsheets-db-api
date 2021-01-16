@@ -11,6 +11,10 @@ from gsheetsdb.exceptions import Error, NotSupportedError, ProgrammingError
 from gsheetsdb.query import execute
 from gsheetsdb.sqlite import execute as sqlite_execute
 
+# Import requirement libraries (JG)
+import sqlparse
+from gsheetsdb.url import url_from_sql
+from gsheetsdb.sqlite import execute_all_sql
 
 logger = logging.getLogger(__name__)
 
@@ -130,15 +134,32 @@ class Cursor(object):
 
     @check_closed
     def execute(self, operation, parameters=None, headers=0):
+
         self.description = None
         query = apply_parameters(operation, parameters or {})
-        try:
-            self._results, self.description = execute(
+
+        # Use switch cases for select, insert, update, delete (JG)
+        # Parse query to extract SQL statement/query type
+        parsed = sqlparse.parse(query)[0]
+        parsed_token = parsed.tokens
+
+        # Execute only for 'SELECT' query
+        if str(parsed_token[0]) == 'SELECT':
+            try:
+                self._results, self.description = execute(
                 query, headers, self.credentials)
-        except (ProgrammingError, NotSupportedError):
-            logger.info('Query failed, running in SQLite')
-            self._results, self.description = sqlite_execute(
-                query, headers, self.credentials)
+
+            except (ProgrammingError, NotSupportedError):
+                logger.info('Query failed, running in SQLite')
+                self._results, self.description = sqlite_execute(
+                    query, headers, self.credentials)
+
+        # Execute when statement is other than 'SELECT'
+        else:
+            # Execute all SQL statements other than 'SELECT'
+            execute_all_sql(query, headers, self.credentials)
+            exit()
+
         return self
 
     @check_closed

@@ -10,7 +10,10 @@ from google.oauth2 import service_account
 
 # Google API scopes for authentication
 # https://developers.google.com/chart/interactive/docs/spreadsheets
-SCOPES = ['https://spreadsheets.google.com/feeds']
+# SCOPES = ['https://spreadsheets.google.com/feeds']  original
+
+# todo: jg
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 
 def get_credentials_from_auth(
