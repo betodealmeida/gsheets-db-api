@@ -10,9 +10,7 @@ from gsheetsdb.exceptions import ProgrammingError
 from gsheetsdb.query import run_query
 from gsheetsdb.url import extract_url, get_url
 
-import time
 
-# import libraries by (JG)
 import sqlparse
 import re
 from googleapiclient import discovery
@@ -84,17 +82,7 @@ def insert_into(cursor, table, payload):
 def execute(query, headers=0, credentials=None):
 
     # fetch all the data
-    # Added by (JG)
-    # Parse query to extract url
-    parsed = sqlparse.parse(query)[0]
-    parsed_token = parsed.tokens
-
-    if str(parsed_token[0]) == 'INSERT':
-
-        from_ = parsed_token[4]   # sheet url
-
-    else:
-        from_ = extract_url(query)
+    from_ = extract_url(query)
 
     if not from_:
         raise ProgrammingError('Invalid query: {query}'.format(query=query))

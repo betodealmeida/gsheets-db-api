@@ -12,7 +12,6 @@ from google.oauth2 import service_account
 # https://developers.google.com/chart/interactive/docs/spreadsheets
 # SCOPES = ['https://spreadsheets.google.com/feeds']  original
 
-# todo: jg
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 

@@ -11,7 +11,6 @@ from gsheetsdb.exceptions import Error, NotSupportedError, ProgrammingError
 from gsheetsdb.query import execute
 from gsheetsdb.sqlite import execute as sqlite_execute
 
-# Import requirement libraries (JG)
 import sqlparse
 from gsheetsdb.url import url_from_sql
 from gsheetsdb.sqlite import execute_all_sql

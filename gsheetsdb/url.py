@@ -11,7 +11,7 @@ import re
 from six.moves.urllib import parse
 
 
-FROM_REGEX = re.compile(' from ("http.*?")', re.IGNORECASE)  # original, only takes select, otherwise raise errors
+FROM_REGEX = re.compile(' from ("http.*?")', re.IGNORECASE) 
 
 
 def get_url(url, headers=0, gid=0, sheet=None):
