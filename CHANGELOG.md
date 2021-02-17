@@ -45,3 +45,6 @@
 
 ## [0.1.12] - 2020-12-04
 - Implement `do_ping` method always returning true
+
+## [0.1.13] - 2021-02-17
+- Handle escaped periods in URL
