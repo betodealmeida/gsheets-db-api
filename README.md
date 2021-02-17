@@ -1,6 +1,18 @@
 [![Build Status](https://travis-ci.org/betodealmeida/gsheets-db-api.svg?branch=master)](https://travis-ci.org/betodealmeida/gsheets-db-api) [![codecov](https://codecov.io/gh/betodealmeida/gsheets-db-api/branch/master/graph/badge.svg)](https://codecov.io/gh/betodealmeida/gsheets-db-api)
 
+**Note:** [shillelagh](https://github.com/betodealmeida/shillelagh/) is a drop-in replacement for `gsheets-db-api`, with many additional features. You should use it instead. If you're using SQLAlchemy all you need to do:
 
+```bash
+$ pip uninstall gsheetsdb
+$ pip install shillelagh
+```
+
+If you're using the DB API:
+
+```bash
+# from gsheetsdb import connect
+from shillelagh.backends.apsw.db import connect
+```
 
 # A Python DB API 2.0 for Google Spreadsheets #
 
