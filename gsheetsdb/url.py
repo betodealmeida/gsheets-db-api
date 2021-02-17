@@ -43,8 +43,10 @@ def get_url(url, headers=0, gid=0, sheet=None):
         args['gid'] = gid
     params = parse.urlencode(args)
 
+    netloc = parts.netloc.replace("\.", ".")
+
     return parse.urlunparse(
-        (parts.scheme, parts.netloc, path, None, params, None))
+        (parts.scheme, netloc, path, None, params, None))
 
 
 def extract_url(sql):
