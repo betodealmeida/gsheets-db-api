@@ -43,7 +43,7 @@ tabulate==0.8.7
 toml==0.10.1
 tqdm==4.49.0
 twine==3.2.0
-urllib3==1.25.10
+urllib3==1.26.5
 wcwidth==0.2.5
 webencodings==0.5.1
 yarg==0.1.9
